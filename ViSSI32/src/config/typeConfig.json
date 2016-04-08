@@ -1,0 +1,72 @@
+{
+	"map":
+	{
+		"method":
+		[
+			{
+			"k": "PSO",
+			"v": 1 
+			},
+			{
+			"k": "PSO_discrete",
+			"v": 2 
+			},
+			{
+			"k": "ACO",
+			"v": 4 
+			}
+		],
+		"visual":
+		[
+			{
+			"k": "G2D_vt",
+			"v": 1
+			},
+			{
+			"k": "G3D_vt",
+			"v": 2
+			},
+			{
+			"k": "GCovery_vt",
+			"v": 4
+			},
+			{
+			"k": "GLines_vt",
+			"v": 8
+			}
+		],
+		"cod":
+		[
+			{
+			"k": "continuous",
+			"v": 1
+			},
+			{
+			"k": "discrete",
+			"v": 2
+			}
+		]
+	},
+
+	"content":
+	[
+		{
+			"model":"Continuous_Benchmark",
+			"cod":1,
+			"method":[1],
+			"visual":[1,2]
+		}, 	
+		{
+			"model":"Continuous_Covery",
+			"cod":1,
+			"method":[1],
+			"visual":[4]
+		},
+		{
+			"model":"Discrete_TSP",
+			"cod":2,
+			"method":[2,4],
+			"visual":[8]
+		}
+	]
+}
