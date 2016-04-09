@@ -167,8 +167,8 @@ void Controler::setMethod(
 	else if (!strcmp(fitness_function, ff_Coverage))
 	{
 		int node_num = 10;
-		int scale = 50;
-		fitness_f = new Coverage_function(node_num, 3.5, scale);
+		int scale = 30;
+		fitness_f = new Coverage_function(node_num, 2, scale);
 		draw_type = DRAR_COVERAGE;
 		pconfig->dim = node_num * 2;
 		pconfig->pos_scale = scale;

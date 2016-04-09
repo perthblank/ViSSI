@@ -5,5 +5,8 @@
 This project is been constructing, and no license available now. 
 **Donnot use the code before formal release**
 
-### Supported Environment
+## Detail & Screenshot
+Check them currently on [project introduction page](http://perthblank.in/post.html?targ=vissi)
+
+## Supported Environment
 32-bit Visual Studio

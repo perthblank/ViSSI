@@ -211,7 +211,7 @@ void Renderer::draw2Dspace()
 
 	glUniform1i(draw_flag_ID, 2);
 	glUniform1i(color_flag_ID, BLACK);
-	glPointSize(2.5);
+	glPointSize(1.5);
 	glDrawArrays(GL_POINTS, 0, p_num);
 
 
@@ -269,7 +269,7 @@ void Renderer::draw3Dspace()
 
 	glUniform1f(gb_value_ID, sip->getGBValue());
 	glUniform1f(scale_ID, pos_scale*1.8);
-	glUniform1f(color_flag_ID, DIFF_BASED);
+	glUniform1i(color_flag_ID, DIFF_BASED);
 
 	glPointSize(4.f);
 	glDrawArrays(GL_POINTS, 0, p_num);
