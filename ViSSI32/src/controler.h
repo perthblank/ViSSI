@@ -12,8 +12,28 @@ using namespace std;
 #include "renderer.h"
 #include "vssi_util.h"
 
-#define Countinuous_Label "Continuous"
-#define Discrete_Label "Discrete"
+extern struct METHOD_LABELSCLASS METHOD_LABELS;
+extern struct COD_LABELSCLASS COD_LABELS;
+extern struct MODEL_LABELSCLASS MODEL_LABELS;
+
+struct METHOD_LABELSCLASS
+{
+	const char * PSO = "PSO";
+	const char * PSO_DESCRETE = "PSO_discrete";
+	const char * ACO = "ACO";
+};
+
+struct COD_LABELSCLASS
+{
+	const char * Countinuous = "Continuous";
+	const char * Discrete = "Discrete";
+};
+
+struct MODEL_LABELSCLASS
+{
+	const char * Continuous_benchmark = "Continuous_Benchmark";
+	const char * Continuous_coverage = "Continuous_Coverage";
+};
 
 #define GOOD 0
 #define ERR_SI 1

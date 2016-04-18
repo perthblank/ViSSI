@@ -11,7 +11,7 @@ using namespace std;
 
 #define CONTINUOUS 1
 #define DISCRETE 2
-#define DEFAULT_CONFIG_FILE "..\\src\\config\\typeConfig.json"
+#define DEFAULT_MAIN_WINDOW_CONFIG_FILE "..\\src\\config\\typeConfig.json"
 
 class ModelOption;
 class ConfigTable;
@@ -50,25 +50,22 @@ public:
 class ConfigTable
 {
 public:
-	ConfigTable()
+	ConfigTable(const char * filename)
 	{
-		parseTypeConfig(DEFAULT_CONFIG_FILE);
+		parseTypeConfig(filename);
 	}
+
+	ConfigTable():ConfigTable(DEFAULT_MAIN_WINDOW_CONFIG_FILE)
+	{}
 
 	void setModelType(string mt)
-	{
-
-	}
+	{}
 
 	void setMethodType(string mt)
-	{
-
-	}
+	{}
 
 	void setVisualType(string mt)
-	{
-
-	}
+	{}
 
 	LList getModels(int type)
 	{

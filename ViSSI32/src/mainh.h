@@ -31,6 +31,8 @@ using namespace std;
 
 #define WIN32
 
+#define CONFIG_NOT_VALID_EXCEPTION 1
+
 #include "controler.h"
 #include "type_mgr.h"
 #include "vssi_util.h"

@@ -42,6 +42,23 @@ private:
 	HANDLE sem;
 };
 
+class Util
+{
+public:
+	static float dist(int x1, int y1, int x2, int y2)
+	{
+		return sqrt((x1 - x2)*(x1 - x2) + (y1 - y2)*(y1 - y2));
+	}
+
+	static void exchange(int & a, int & b)
+	{
+		int tmp = a;
+		a = b;
+		b = tmp;
+	}
+};
+
+
 
 
 #endif // !UTIL_H

@@ -57,7 +57,7 @@
 			"visual":[1,2]
 		}, 	
 		{
-			"model":"Continuous_Covery",
+			"model":"Continuous_Coverage",
 			"cod":1,
 			"method":[1],
 			"visual":[4]

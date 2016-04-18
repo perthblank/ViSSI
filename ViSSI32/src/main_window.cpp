@@ -3,13 +3,13 @@
 #include "control_panel_3d.h"
 
 
-Fl_Group *group_counti_covery = (Fl_Group *)0;
+Fl_Group *group_counti_coverage = (Fl_Group *)0;
 
-Fl_Input *inp_covery_numOfNode = (Fl_Input *)0;
+Fl_Input *inp_coverage_numOfNode = (Fl_Input *)0;
 
-Fl_Input *inp_covery_radius = (Fl_Input *)0;
+Fl_Input *inp_coverage_radius = (Fl_Input *)0;
 
-Fl_Input *inp_covery_Scale = (Fl_Input *)0;
+Fl_Input *inp_coverage_Scale = (Fl_Input *)0;
 
 Fl_Double_Window *main_window = (Fl_Double_Window *)0;
 
@@ -159,12 +159,12 @@ void cb_counti_model(Fl_Choice *c, void*)
 	if (c->value() == 0)
 	{
 		group_counti_benchmark->show();
-		group_counti_covery->hide();
+		group_counti_coverage->hide();
 	}
 	else
 	{
 		group_counti_benchmark->hide();
-		group_counti_covery->show();
+		group_counti_coverage->show();
 	}
 
 	setMethodOptions(c->text());
@@ -174,11 +174,11 @@ void cb_model_tabs(Fl_Widget *wt, void *)
 {
 	Fl_Tabs * tabs = (Fl_Tabs *)wt;
 
-	if (!strcmp(Countinuous_Label, ((Fl_Tabs *)tabs->value())->label()))
+	if (!strcmp(COD_LABELS.Countinuous, ((Fl_Tabs *)tabs->value())->label()))
 	{
 		initMethodChoice(CONTINUOUS);
 	}
-	else if (!strcmp(Discrete_Label, ((Fl_Tabs *)tabs->value())->label()))
+	else if (!strcmp(COD_LABELS.Discrete, ((Fl_Tabs *)tabs->value())->label()))
 	{
 		initMethodChoice(DISCRETE);
 	}
@@ -197,9 +197,9 @@ void initConfig()
 	inp_pso_wValue->value("0.8");
 	inp_pso_maxT->value("300");
 
-	inp_covery_numOfNode->value("20");
-	inp_covery_radius->value("3.5");
-	inp_covery_Scale->value("100");
+	inp_coverage_numOfNode->value("20");
+	inp_coverage_radius->value("3.5");
+	inp_coverage_Scale->value("100");
 }
 
 
@@ -223,16 +223,16 @@ void cb_start(Fl_Widget *c, void *)
 	unsigned dim = 0;
 
 	method = choice_method->text();
-	if (!strcmp(choice_method->text(), "PSO")) {
+	if (!strcmp(choice_method->text(), METHOD_LABELS.PSO)) {
 		config = new PSOConfig;
 		getConfig((PSOConfig*)config);
 	}
 
 	const char * model_type = ((Fl_Tabs *)tabs_model->value())->label();
-	if (!strcmp(Countinuous_Label, model_type))
+	if (!strcmp(COD_LABELS.Countinuous, model_type))
 	{
 		const char * model = choice_counti_model->text();
-		if (!strcmp(model, "Continuous_Benchmark"))
+		if (!strcmp(model, MODEL_LABELS.Continuous_benchmark))
 		{
 			fitness_function = choice_counti_benchmark_func->text();
 			dim = ((bool)((Fl_Button*)rbtn_counti_benchmark_2d->value())) ? 2 : 3;;
@@ -243,7 +243,7 @@ void cb_start(Fl_Widget *c, void *)
 		}
 
 	}
-	else if (!strcmp(Discrete_Label, model_type))
+	else if (!strcmp(COD_LABELS.Discrete, model_type))
 	{
 	}
 
@@ -293,7 +293,7 @@ int setWindow(int argc, char **argv) {
 			tabs_model->callback((Fl_Callback*)cb_model_tabs);
 
 			{
-				group_counti = new Fl_Group(23, 85, 565, 215, Countinuous_Label);
+				group_counti = new Fl_Group(23, 85, 565, 215, COD_LABELS.Countinuous);
 				group_counti->selection_color((Fl_Color)29);
 
 				{
@@ -303,24 +303,24 @@ int setWindow(int argc, char **argv) {
 				} // Fl_Choice* choice_counti_model
 
 				{
-					group_counti_covery = new Fl_Group(38, 140, 495, 150);
-					group_counti_covery->box(FL_EMBOSSED_BOX);
+					group_counti_coverage = new Fl_Group(38, 140, 495, 150);
+					group_counti_coverage->box(FL_EMBOSSED_BOX);
 
 					{
-						inp_covery_numOfNode = new Fl_Input(150, 161, 100, 24, "Num Of Node:");
-					} // Fl_Input* inp_covery_numOfNode
+						inp_coverage_numOfNode = new Fl_Input(150, 161, 100, 24, "Num Of Node:");
+					} // Fl_Input* inp_coverage_numOfNode
 
 					{
-						inp_covery_radius = new Fl_Input(150, 191, 100, 24, "Radius(m):");
-					} // Fl_Input* inp_covery_radius
+						inp_coverage_radius = new Fl_Input(150, 191, 100, 24, "Radius(m):");
+					} // Fl_Input* inp_coverage_radius
 
 					{
-						inp_covery_Scale = new Fl_Input(150, 221, 100, 24, "Area Scale (m):");
-					} // Fl_Input* inp_covery_Scale
+						inp_coverage_Scale = new Fl_Input(150, 221, 100, 24, "Area Scale (m):");
+					} // Fl_Input* inp_coverage_Scale
 
-					group_counti_covery->end();
-					group_counti_covery->hide();
-				} // Fl_Group* group_counti_covery
+					group_counti_coverage->end();
+					group_counti_coverage->hide();
+				} // Fl_Group* group_counti_coverage
 
 				{
 					group_counti_benchmark = new Fl_Group(38, 140, 495, 150);
@@ -364,7 +364,7 @@ int setWindow(int argc, char **argv) {
 			} // Fl_Group* group_counti
 
 			{
-				group_discrete = new Fl_Group(20, 85, 553, 205, Discrete_Label);
+				group_discrete = new Fl_Group(20, 85, 553, 205, COD_LABELS.Discrete);
 				group_discrete->selection_color((Fl_Color)29);
 				group_discrete->hide();
 
@@ -378,11 +378,11 @@ int setWindow(int argc, char **argv) {
 					group_discrete_seq = new Fl_Group(38, 140, 495, 150);
 					group_discrete_seq->box(FL_EMBOSSED_BOX);
 
-					{
-						choice_discrete_seq_func = new Fl_Choice(113, 155, 226, 25, "Function:");
-						choice_discrete_seq_func->down_box(FL_BORDER_BOX);
-						choice_discrete_seq_func->callback((Fl_Callback*)callback);
-					} // Fl_Choice* choice_discrete_seq_func
+					//{
+					//	choice_discrete_seq_func = new Fl_Choice(113, 155, 226, 25, "Function:");
+					//	choice_discrete_seq_func->down_box(FL_BORDER_BOX);
+					//	choice_discrete_seq_func->callback((Fl_Callback*)callback);
+					//} // Fl_Choice* choice_discrete_seq_func
 
 					{
 						btn_discrete_tspConfig = new Fl_Button(180, 223, 158, 27, "Configure Positions...");

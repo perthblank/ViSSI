@@ -159,6 +159,7 @@
     <ClCompile Include="..\src\render_control.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\src\aco_method.h" />
     <ClInclude Include="..\src\controler.h" />
     <ClInclude Include="..\src\control_panel_3d.h" />
     <ClInclude Include="..\src\fitness_function.h" />

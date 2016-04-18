@@ -1,5 +1,9 @@
 #include "controler.h"
 
+struct METHOD_LABELSCLASS METHOD_LABELS;
+struct COD_LABELSCLASS COD_LABELS;
+struct MODEL_LABELSCLASS MODEL_LABELS;
+
 Controler::Controler()
 {
 	sip = NULL;

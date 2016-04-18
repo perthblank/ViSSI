@@ -77,6 +77,9 @@
     <ClInclude Include="..\src\fitness_function.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\aco_method.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\src\ColorFragmentShader.glsl">
