@@ -20,6 +20,8 @@
 #include <FL/Fl_Check_Button.H>
 #include <FL/Fl_Round_Button.H>
 #include <FL/Fl_Scroll.H>
+#include <FL/Fl_File_Chooser.H>
+#include <FL/Fl_File_Icon.H>
 
 #include <cstdio>
 #include <cstring>

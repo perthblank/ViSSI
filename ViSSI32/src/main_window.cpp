@@ -1,6 +1,7 @@
 #include "mainh.h"
 #include "main_window.h"
 #include "control_panel_3d.h"
+#include "alert.h"
 
 
 Fl_Group *group_counti_coverage = (Fl_Group *)0;
@@ -57,6 +58,10 @@ Fl_Choice *choice_method = (Fl_Choice *)0;
 
 Fl_Group *group_config_pso = (Fl_Group *)0;
 
+Fl_Group *group_config_aco = (Fl_Group *)0;
+
+Fl_Group *group_config_pso_discrete = (Fl_Group *)0;
+
 Fl_Input *inp_pso_popSize = (Fl_Input *)0;
 
 Fl_Input *inp_pso_spcScale = (Fl_Input *)0;
@@ -68,6 +73,14 @@ Fl_Input *inp_pso_wValue = (Fl_Input *)0;
 Fl_Input *inp_pso_c1 = (Fl_Input *)0;
 
 Fl_Input *inp_pso_c2 = (Fl_Input *)0;
+
+Fl_Input *inp_aco_popSize = (Fl_Input *)0;
+
+Fl_Input *inp_aco_maxT = (Fl_Input *)0;
+
+Fl_Input *inp_aco_T0 = (Fl_Input *)0;
+
+Fl_Input *inp_aco_P0 = (Fl_Input *)0;
 
 Fl_Group *rgroup_pso_mode = (Fl_Group *)0;
 
@@ -82,6 +95,10 @@ Fl_Button *btn_save = (Fl_Button *)0;
 Fl_Button *btn_exit = (Fl_Button *)0;
 
 Fl_Button *btn_about = (Fl_Button *)0;
+
+Fl_File_Chooser *fc_tsp_file = 0;
+
+Fl_Input *inp_tsp_file = 0;
 
 
 int strToInt(string s)
@@ -133,10 +150,16 @@ bool initMethodChoice(int flag)
 	{
 	case CONTINUOUS:
 		setOptions(choice_method, config_table->getMethods(choice_counti_model->text()));
+		group_config_aco->hide();
+		group_config_pso->show();
+		group_config_pso_discrete->hide();
 		break;
 
 	case DISCRETE:
 		setOptions(choice_method, config_table->getMethods(choice_discrete_model->text()));
+		group_config_aco->show();
+		group_config_pso->hide();
+		group_config_pso_discrete->hide();
 		break;
 
 	default:
@@ -197,9 +220,14 @@ void initConfig()
 	inp_pso_wValue->value("0.8");
 	inp_pso_maxT->value("300");
 
-	inp_coverage_numOfNode->value("20");
+	inp_coverage_numOfNode->value("10");
 	inp_coverage_radius->value("3.5");
-	inp_coverage_Scale->value("100");
+	inp_coverage_Scale->value("20");
+
+	inp_aco_popSize->value("20");
+	inp_aco_maxT->value("100");
+	inp_aco_T0->value("190");
+	inp_aco_P0->value("0.7");
 }
 
 
@@ -215,6 +243,21 @@ void getConfig(PSOConfig *config)
 
 }
 
+void getConfig(ACOConfig *config)
+{
+	config->population = strToInt(inp_aco_popSize->value());
+	config->max_t = strToInt(inp_aco_maxT->value());
+	config->P0 = strToFloat(inp_aco_P0->value());
+	config->T0 = strToFloat(inp_aco_T0->value());
+}
+
+void getConfig(CoverageConfig * config)
+{
+	config->numOfNode = strToInt(inp_coverage_numOfNode->value());
+	config->scale = strToFloat(inp_coverage_Scale->value());
+	config->radius = strToFloat(inp_coverage_radius->value());
+}
+
 void cb_start(Fl_Widget *c, void *)
 {
 	string method;
@@ -226,6 +269,12 @@ void cb_start(Fl_Widget *c, void *)
 	if (!strcmp(choice_method->text(), METHOD_LABELS.PSO)) {
 		config = new PSOConfig;
 		getConfig((PSOConfig*)config);
+	}
+	else if (!strcmp(choice_method->text(), METHOD_LABELS.ACO)) {
+		if (!inp_tsp_file->value())
+			return;
+		config = new ACOConfig(inp_tsp_file->value());
+		getConfig((ACOConfig*)config);
 	}
 
 	const char * model_type = ((Fl_Tabs *)tabs_model->value())->label();
@@ -240,6 +289,12 @@ void cb_start(Fl_Widget *c, void *)
 		else
 		{
 			fitness_function = model;
+
+			if (!strcmp(model, MODEL_LABELS.Continuous_coverage))
+			{
+				((PSOConfig*)config)->ptr = (CoverageConfig *) new CoverageConfig;
+				getConfig((CoverageConfig *)((PSOConfig*)config)->ptr);
+			}
 		}
 
 	}
@@ -254,6 +309,7 @@ void cb_start(Fl_Widget *c, void *)
 	catch (...)
 	{
 		cout << "parameter error" << endl;
+		alertMsg("parameter error");
 		return;
 	}
 	main_controler->run();
@@ -262,17 +318,56 @@ void cb_start(Fl_Widget *c, void *)
 	
 }
 
-
-void destroyWindow()
+void cb_show_tsp_fc()
 {
-	delete main_window;
+	char file_path[FL_PATH_MAX];
 
-	if (cp3d_window != 0)
+	fc_tsp_file->show();
+
+	while (fc_tsp_file->visible()) {
+		Fl::wait();
+	}
+
+	int count = fc_tsp_file->count();
+	if (count > 0)
 	{
-		delete cp3d_window;
+		inp_tsp_file->value("");
+
+		for (int i = 1; i <= count; ++i)
+		{
+			if (!fc_tsp_file->value(i))
+				break;
+
+			fl_filename_relative(file_path, sizeof(file_path), fc_tsp_file->value(i));
+
+			inp_tsp_file->value(file_path);
+		}
+
+		inp_tsp_file->redraw();
 	}
 }
 
+void cb_method()
+{
+	const char * method = choice_method->text();
+
+	group_config_aco->hide();
+	group_config_pso->hide();
+	group_config_pso_discrete->hide();
+
+	if (!strcmp(method, METHOD_LABELS.PSO))
+	{
+		group_config_pso->show();
+	}
+	else if (!strcmp(method, METHOD_LABELS.ACO))
+	{
+		group_config_aco->show();
+	}
+	else if (!strcmp(method, METHOD_LABELS.PSO_DESCRETE))
+	{
+
+	}
+}
 
 int setWindow(int argc, char **argv) {
 	{
@@ -384,20 +479,28 @@ int setWindow(int argc, char **argv) {
 					//	choice_discrete_seq_func->down_box(FL_BORDER_BOX);
 					//	choice_discrete_seq_func->callback((Fl_Callback*)callback);
 					//} // Fl_Choice* choice_discrete_seq_func
+					//{
+					//	btn_discrete_tspConfig = new Fl_Button(180, 223, 158, 27, "Configure Positions...");
+					//	btn_discrete_tspConfig->callback((Fl_Callback*)callback);
+					//} // Fl_Button* btn_discrete_tspConfig
+					//{
+					//	inp_discrete_tsp_citynum = new Fl_Input(113, 189, 85, 25, "City Num:");
+					//} // Fl_Input* inp_discrete_tsp_citynum
+					//{
+					//	chk_discrete_tsp_randPos = new Fl_Check_Button(50, 225, 150, 25, "random position");
+					//	chk_discrete_tsp_randPos->down_box(FL_DOWN_BOX);
+					//} // Fl_Check_Button* chk_discrete_tsp_randPos
 
-					{
-						btn_discrete_tspConfig = new Fl_Button(180, 223, 158, 27, "Configure Positions...");
-						btn_discrete_tspConfig->callback((Fl_Callback*)callback);
-					} // Fl_Button* btn_discrete_tspConfig
+					Fl_Button* button = new Fl_Button(430, 160, 25, 25);
+					button->labelcolor(FL_YELLOW);
+					button->callback((Fl_Callback *)cb_show_tsp_fc);
+					Fl_File_Icon::load_system_icons();
+					Fl_File_Icon * icon = Fl_File_Icon::find(".", Fl_File_Icon::DIRECTORY);
+					icon->label(button);
 
-					{
-						inp_discrete_tsp_citynum = new Fl_Input(113, 189, 85, 25, "City Num:");
-					} // Fl_Input* inp_discrete_tsp_citynum
-
-					{
-						chk_discrete_tsp_randPos = new Fl_Check_Button(50, 225, 150, 25, "random position");
-						chk_discrete_tsp_randPos->down_box(FL_DOWN_BOX);
-					} // Fl_Check_Button* chk_discrete_tsp_randPos
+					inp_tsp_file = new Fl_Input(140, 160, 270, 25, "TSP Config:");
+					inp_tsp_file->value(DEFAULT_TSP_CONFIG_FILE);
+					inp_tsp_file->align(FL_ALIGN_LEFT);
 
 					group_discrete_seq->end();
 
@@ -405,23 +508,22 @@ int setWindow(int argc, char **argv) {
 
 				{
 					rgroup_discrete_draw_mode = new Fl_Group(50, 255, 260, 31);
-					rgroup_discrete_draw_mode->box(FL_THIN_UP_FRAME);
+					//rgroup_discrete_draw_mode->box(FL_THIN_UP_FRAME);
 
-					{
-						rbtn_discrete_tsp_lines = new Fl_Round_Button(55, 258, 105, 26, "draw lines");
-						rbtn_discrete_tsp_lines->type(102);
-						rbtn_discrete_tsp_lines->down_box(FL_ROUND_DOWN_BOX);
-						rbtn_discrete_tsp_lines->callback((Fl_Callback*)callback);
-					} // Fl_Round_Button* rbtn_discrete_tsp_lines
+					//{
+					//	rbtn_discrete_tsp_lines = new Fl_Round_Button(55, 258, 105, 26, "draw lines");
+					//	rbtn_discrete_tsp_lines->type(102);
+					//	rbtn_discrete_tsp_lines->down_box(FL_ROUND_DOWN_BOX);
+					//	rbtn_discrete_tsp_lines->callback((Fl_Callback*)callback);
+					//} // Fl_Round_Button* rbtn_discrete_tsp_lines
+					//{
+					//	rbtn_discrete_tsp_lineStrip = new Fl_Round_Button(165, 259, 125, 25, "draw line-stripe");
+					//	rbtn_discrete_tsp_lineStrip->type(102);
+					//	rbtn_discrete_tsp_lineStrip->down_box(FL_ROUND_DOWN_BOX);
+					//	rbtn_discrete_tsp_lineStrip->callback((Fl_Callback*)callback);
+					//} // Fl_Round_Button* rbtn_discrete_tsp_lineStrip
 
-					{
-						rbtn_discrete_tsp_lineStrip = new Fl_Round_Button(165, 259, 125, 25, "draw line-stripe");
-						rbtn_discrete_tsp_lineStrip->type(102);
-						rbtn_discrete_tsp_lineStrip->down_box(FL_ROUND_DOWN_BOX);
-						rbtn_discrete_tsp_lineStrip->callback((Fl_Callback*)callback);
-					} // Fl_Round_Button* rbtn_discrete_tsp_lineStrip
-
-					rgroup_discrete_draw_mode->end();
+					//rgroup_discrete_draw_mode->end();
 				} // Fl_Group* rgroup_discrete_draw_mode
 
 				group_discrete->end();
@@ -460,7 +562,7 @@ int setWindow(int argc, char **argv) {
 		{
 			choice_method = new Fl_Choice(85, 359, 185, 24, "method:");
 			choice_method->down_box(FL_BORDER_BOX);
-			choice_method->callback((Fl_Callback*)callback);
+			choice_method->callback((Fl_Callback*)cb_method);
 		} // Fl_Choice* choice_method
 
 		{
@@ -518,6 +620,30 @@ int setWindow(int argc, char **argv) {
 		} // Fl_Group* group_config_pso
 
 		{
+			group_config_aco = new Fl_Group(30, 390, 560, 140);
+			group_config_aco->box(FL_EMBOSSED_BOX);
+			group_config_aco->labeltype(FL_SHADOW_LABEL);
+
+			inp_aco_popSize = new Fl_Input(150, 401, 160, 25, "Population Size:");
+			inp_aco_maxT = new Fl_Input(150, 432, 160, 25, "Max Iterations:");
+			inp_aco_T0 = new Fl_Input(150, 465, 160, 25, "Pher0:");
+			inp_aco_P0 = new Fl_Input(150, 497, 160, 25, "Prob0:");
+
+			group_config_aco->end();
+		}// Fl_Group* group_config_aco
+
+		{
+			group_config_pso_discrete = new Fl_Group(30, 390, 560, 140);
+			group_config_pso_discrete->box(FL_EMBOSSED_BOX);
+			group_config_pso_discrete->labeltype(FL_SHADOW_LABEL);
+
+
+
+			group_config_pso_discrete->end();
+	
+		}// Fl_Group* group_config_pso_discrete
+
+		{
 			btn_start = new Fl_Button(30, 560, 80, 30, "Start");
 			btn_start->callback((Fl_Callback*)cb_start);
 		} // Fl_Button* btn_start
@@ -539,6 +665,11 @@ int setWindow(int argc, char **argv) {
 
 	} // Fl_Double_Window* main_window
 
+	{
+		fc_tsp_file = new Fl_File_Chooser(".", "*", Fl_File_Chooser::SINGLE, "Choose TSP Config File");
+		//fc_tsp_file->callback(fc_callback);
+		fc_tsp_file->filter("JSON File (*.json)\t");
+	}
 
 	initCountiModelChoice();
 
@@ -546,14 +677,23 @@ int setWindow(int argc, char **argv) {
 
 	initConfig();
 
+	initAlert();
+
 	main_window->show(argc, argv);
 
+	main_window->callback(cb_close_main_window);
+
 	return Fl::run();
+}
+
+void cb_close_main_window(Fl_Widget *, void *)
+{
+	destroyAlert();
+	Fl::delete_widget(main_window);
 }
 
 void callback(Fl_Widget* o, void*)
 {
 	printf("Default callback\n");
 }
-
 

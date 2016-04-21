@@ -20,6 +20,18 @@ public:
 
 	float c1, c2;
 
+	void * ptr;
+
+	PSOConfig()
+	{
+		ptr = NULL;
+	}
+
+	~PSOConfig()
+	{
+		if (ptr != NULL)
+			delete ptr;
+	}
 };
 
 class PSOMethod:public SIMethod 

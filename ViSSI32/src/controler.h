@@ -33,7 +33,7 @@ struct COD_LABELSCLASS
 struct MODEL_LABELSCLASS
 {
 	const char * Continuous_benchmark = "Continuous_Benchmark";
-	const char * Continuous_coverage = "Continuous_Coverage";
+	const char * Continuous_coverage = ff_Coverage;
 };
 
 #define GOOD 0
@@ -107,7 +107,7 @@ private:
 
 	unsigned int __stdcall SICross(int t);
 
-	unsigned iter_gap;
+	unsigned iter_gap, iter_gap_default = 270;
 };
 
 #endif

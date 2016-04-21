@@ -19,23 +19,12 @@ void destroyAll()
 	delete config_table;
 }
 
-void initControler()
-{
-
-}
 
 
 int main(int argc, char **argv)
 {
+	srand(time(0));
 	initAll();
 	setWindow(argc, argv);
 	destroyAll();
-	destroyWindow();
-
-	//srand(time(0));
-
-	//ACOMethod a(20,100);
-
-
-	//system("pause");
 }

@@ -3,7 +3,7 @@
 
 #include "mainh.h"
 
-
+#define DEFAULT_TSP_CONFIG_FILE "..\\src\\config\\cities.json"
 
 void callback(Fl_Widget* o, void*);
 
@@ -31,7 +31,11 @@ void cb_start(Fl_Widget *c, void *);
 
 void getConfig(PSOConfig *config);
 
-void destroyWindow();
+void cb_show_tsp_fc();
+
+void cb_method();
+
+void cb_close_main_window(Fl_Widget *, void *);
 
 #endif
 

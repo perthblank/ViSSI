@@ -1,9 +1,13 @@
 #include "aco_method.h"
 
-ACOMethod::ACOMethod(int a_num, int max_t)
-	:SIMethod(max_t, NULL), a_num(a_num), max_t(max_t)
+ACOMethod::ACOMethod(ACOConfig *config)
+	:SIMethod(config->max_t, NULL)
 {
-	tsp_function = new TSP_function;
+	a_num = (config->population);
+	max_t = (config->max_t);
+	T0 = config->T0;
+	P0 = config->P0;
+	tsp_function = new TSP_function(config->path);
 	c_num = tsp_function->c_num;
 	setup(c_num);
 	gb_route = new Route(c_num, tsp_function);
@@ -39,8 +43,7 @@ void ACOMethod::setup(int c_num)
 	a = 2.0;
 	b = 3.0;
 	q = 0.05;
-	T0 = 110;
-	P0 = 0.7;
+
 
 	pher = (float **) new float *[c_num];
 	prob = (float **) new float *[c_num];

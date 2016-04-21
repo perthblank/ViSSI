@@ -149,7 +149,6 @@ public:
 					}
 				}
 			}
-
 		}
 
 		return sum;
@@ -174,5 +173,15 @@ public:
 	CP_MAP_TYPE ** cp_map;
 };
 
+
+class CoverageConfig
+{
+public:
+	int numOfNode;
+
+	float radius;
+
+	int scale;
+};
 
 #endif

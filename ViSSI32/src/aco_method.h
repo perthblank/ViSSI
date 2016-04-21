@@ -10,10 +10,23 @@
 #include <iostream>
 using namespace std;
 
-#define DEFAULT_TSP_CONFIG_FILE "..\\src\\config\\cities.json"
+
 #define JSON_NAME_CITIES "cities"
 #define JSON_X "x"
 #define JSON_Y "y"
+
+class ACOConfig : public MethodConfig
+{
+public:
+	int population;
+	int max_t;
+	float T0;
+	float P0;
+	const char * path;
+
+	ACOConfig(const char *path) : path(path)
+	{}
+};
 
 class TSP_function
 {
@@ -56,9 +69,6 @@ public:
 		}
 		is.close();
 	}
-
-	TSP_function() :TSP_function(DEFAULT_TSP_CONFIG_FILE)
-	{}
 
 	float getRes(int * r)
 	{
@@ -232,21 +242,30 @@ class ACOMethod: public SIMethod
 {
 public:
 	Route ** routes;
+
 	Route * gb_route;
+
 	TSP_function* tsp_function;
 
 	float ** pher, //pheromone
 		** prob,
 		** note;
+
 	float T0, P0;
+
 	float q;
+
 	float a, b;
+
 	int max_t;
+
 	int a_num, c_num;
+
 	float ph_max = 310;
+
 	float ph_min = 0.1;
 
-	ACOMethod(int a_num, int max_t);
+	ACOMethod(ACOConfig * config);
 
 	~ACOMethod();
 

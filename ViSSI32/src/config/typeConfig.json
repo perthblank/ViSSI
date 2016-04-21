@@ -8,13 +8,14 @@
 			"v": 1 
 			},
 			{
-			"k": "PSO_discrete",
+			"k": "ACO",
 			"v": 2 
 			},
 			{
-			"k": "ACO",
+			"k": "PSO_discrete",
 			"v": 4 
 			}
+	
 		],
 		"visual":
 		[

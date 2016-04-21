@@ -9,7 +9,7 @@ Controler::Controler()
 	sip = NULL;
 	fitness_f = NULL;
 	is_ok = make() == GOOD;
-	iter_gap = 270;
+	iter_gap = iter_gap_default;
 }
 
 Controler::Controler(int ID)
@@ -102,8 +102,6 @@ void Controler::runRender()
 			0, NULL);
 }
 
-
-
 void Controler::run()
 {
 	if (!is_OK())
@@ -172,12 +170,12 @@ void Controler::setMethod(
 		}
 		else if (!strcmp(fitness_function, ff_Coverage))
 		{
-			int node_num = 10;
-			int scale = 30;
-			fitness_f = new Coverage_function(node_num, 2, scale);
+			CoverageConfig * cconfig = (CoverageConfig *)pconfig->ptr;
+
+			fitness_f = new Coverage_function(cconfig->numOfNode, cconfig->radius, cconfig->scale);
 			draw_type = DRAW_COVERAGE;
-			pconfig->dim = node_num * 2;
-			pconfig->pos_scale = scale;
+			pconfig->dim = cconfig->numOfNode * 2;
+			pconfig->pos_scale = cconfig->scale;
 		}
 
 
@@ -190,7 +188,8 @@ void Controler::setMethod(
 
 	else if (!strcmp(method, METHOD_LABELS.ACO))
 	{
-		sip = new ACOMethod(20,100);
+		ACOConfig * aconfig = (ACOConfig*)config;
+		sip = new ACOMethod(aconfig);
 
 		if (!strcmp(fitness_function, ff_TSP))
 		{
@@ -229,7 +228,7 @@ void Controler::destroyCurrent()
 	delete rderp;
 	sip = 0;
 	rderp = 0;
-	iter_gap = 270;
+	iter_gap = iter_gap_default;
 }
 
 void Controler::moveView(int op, float diff)
