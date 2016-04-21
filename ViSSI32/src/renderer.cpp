@@ -13,19 +13,11 @@ Renderer::Renderer(
 	InputFactor.radius = pos_scale * 2;
 	v_size = p_num * 3;
 	p_vertex = sip->getPosArr();
-	p_color = new GLfloat[v_size];
 
 	Projection = glm::perspective(70.0f, 4.0f / 3.0f, 0.1f, pos_scale * 10);
 	Model = glm::translate(Model, glm::vec3(-pos_scale / 2, -pos_scale / 2, -pos_scale / 2));
 
 	if (!gl_config()) return;
-
-	for (size_t i = 0; i < v_size; ++i) {
-
-		p_color[i] = .0f;
-		p_color[++i] = .0f;
-		p_color[++i] = .0f;
-	}
 
 	GLfloat len = pos_scale*1.1f;
 
@@ -67,10 +59,9 @@ Renderer::Renderer(
 	glBindBuffer(GL_ARRAY_BUFFER, valuebuffer);
 	glBufferData(GL_ARRAY_BUFFER, population * sizeof(GLfloat), p_value, GL_STATIC_DRAW);
 
-	if (draw_type == DRAR_COVERAGE)
+	if (draw_type == DRAW_COVERAGE )
 	{
-		glm::mat4 id;
-		Model = id;
+		Model = glm::mat4();
 
 		Coverage_function * cf = (Coverage_function*)sip->getFitnessFunction();
 		const int & scale = cf->scale;
@@ -85,7 +76,6 @@ Renderer::Renderer(
 			grid[i + 1] = 0;
 			grid[i + 2] = j;
 			grid[i + 3] = scale;
-			//printf("%f,%f\n%f,%f\n", grid[i], grid[i+1], grid[i+2], grid[i+3]);
 			++j;
 		}
 		j = 0;
@@ -95,7 +85,6 @@ Renderer::Renderer(
 			grid[i + 1] = j;
 			grid[i + 2] = scale;
 			grid[i + 3] = j;
-			//printf("%f,%f\n%f,%f\n", grid[i], grid[i + 1], grid[i + 2], grid[i + 3]);
 			++j;
 		}
 
@@ -104,6 +93,10 @@ Renderer::Renderer(
 		glBufferData(GL_ARRAY_BUFFER, scale * 8 * sizeof(GLfloat), grid, GL_STATIC_DRAW);
 
 		delete[] grid;
+	}
+	else if (draw_type == DRAW_TSP)
+	{
+		Model = glm::mat4();
 	}
 
 	is_ok = true;
@@ -120,65 +113,226 @@ bool Renderer::is_OK()
 	return is_ok;
 }
 
-void Renderer::drawArray(
-	int type, 
-	GLuint &vertex_buffer,
-	GLuint &color_buffer, 
-	int size, GLenum mode, 
-	float width)
-{
-	glUniform1i(draw_flag_ID, type);
-	GLuint vPos = 0;
-	int vSize = 3;
-	switch (type)
-	{
-	case DRAW_3D:
-		vPos = glGetAttribLocation(program_ID, "vertexPosition_modelspace");
-		vSize = 3;
-		break;
 
-	case DRAW_2D_XZ:
-		vPos = glGetAttribLocation(program_ID, "vertexPosition_modelspace_2d");
-		vSize = 2;
+int Renderer::doRender() 
+{
+	glClearColor(0.9f, 0.9f, 0.9f, 0.0f);
+	do {
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		glUseProgram(program_ID);
+		View = glm::lookAt(
+			glm::vec3(
+				InputFactor.radius*cos(InputFactor.f_a2r*InputFactor.degx),
+				InputFactor.h*pos_scale, 
+				InputFactor.radius*sin(InputFactor.f_a2r*InputFactor.degx)
+),
+			glm::vec3(0, 0, 0),
+			glm::vec3(0, 1, 0)
+			);
+		MVP = Projection * View * Model;
+		glUniformMatrix4fv(Matrix_ID, 1, GL_FALSE, &MVP[0][0]);
+
+		switch (draw_type)
+		{
+		case DRAW_2D_XZ:
+			drawAxis();
+			draw2Dspace();
+			break;
+			
+		case DRAW_3D:
+			drawAxis();
+			draw3Dspace();
+			break;
+
+		case DRAW_COVERAGE:
+			drawCovery();
+			break;
+
+		case DRAW_TSP:
+			
+			drawTSP();
+			break;
+
+		default:
+			return 1;
+
+		}
+
+		glfwSwapBuffers(window);
+		glfwPollEvents();
+
+	} while (alive);
+
+	glDeleteBuffers(1, &axisbuffer);
+	glDeleteBuffers(1, &vertexbuffer);
+	glDeleteBuffers(1, &valuebuffer);
+	glDeleteBuffers(1, &gridbuffer);
+	glDeleteVertexArrays(1, &VertexArrayID);
+	glDeleteProgram(program_ID);
+
+	glfwTerminate();
+
+	return 0;
+}
+
+void Renderer::kill()
+{
+	alive = false;
+}
+
+bool Renderer::gl_config() {
+	if (!glfwInit())
+	{
+		fprintf(stderr, "Failed to initialize GLFW\n");
+		getchar();
+		return false;
 	}
 
+	glfwWindowHint(GLFW_SAMPLES, 4);
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+	//glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE); // To make MacOS happy; should not be needed
+	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+
+	window = glfwCreateWindow(800, 600, "Visualiation SI", NULL, NULL);
+	if (window == NULL) {
+		fprintf(stderr,
+			"Failed to open GLFW window. If you have an Intel GPU, they are not 3.3 compatible. Try the 2.1 version of the tutorials.\n");
+		getchar();
+		glfwTerminate();
+		return false;;
+	}
+	glfwMakeContextCurrent(window);
+
+	glewExperimental = true; // Needed for core profile
+	if (glewInit() != GLEW_OK) {
+		fprintf(stderr, "Failed to initialize GLEW\n");
+		getchar();
+		glfwTerminate();
+		return false;;
+	}
+
+	glfwSetInputMode(window, GLFW_STICKY_KEYS, GL_TRUE);
+	glGenVertexArrays(1, &VertexArrayID);
+	glBindVertexArray(VertexArrayID);
+	glEnable(GL_DEPTH_TEST);
+	glDepthFunc(GL_LESS);
+	glfwSetMouseButtonCallback(window, mouseClick);
+	glfwSetCursorPosCallback(window, mouseMove);
+	glfwSetScrollCallback(window, mouseScroll);
+
+	program_ID = LoadShaders(VERTEX_SHADER_FILE, FRAGMENT_SHADER_FILE);
+
+	Matrix_ID = glGetUniformLocation(program_ID, "MVP");
+	draw_flag_ID = glGetUniformLocation(program_ID, "draw_flag");
+	color_flag_ID = glGetUniformLocation(program_ID, "color_flag");
+	gb_value_ID = glGetUniformLocation(program_ID, "gb_value");
+	scale_ID = glGetUniformLocation(program_ID, "scale");
+	return true;
+}
+
+void Renderer::printM(glm::mat4 m)
+{
+	for (int i = 0; i < 4; ++i) 
+	{
+		for (int j = 0; j < 4; ++j)
+			printf("%f ", m[i][j]);
+		printf("\n");
+	}
+}
+
+void Renderer::drawTSP()
+{
+
+	vector<int> & city_pos = ((ACOMethod*)sip)->tsp_function->coords;
+	int city_num = city_pos.size()/2;
+	int scale = 30;
+
+
+	glUseProgram(program_ID);
+
+	Projection = glm::perspective(70.0f, 4.0f / 3.0f, 0.1f, (float)scale * 15);
+	View = glm::lookAt(
+		glm::vec3(scale / 2 - InputFactor.degx / 3, InputFactor.radius, scale / 2 - InputFactor.degy / 3),
+		glm::vec3(scale / 2 - InputFactor.degx / 3, 0, scale / 2 - InputFactor.degy / 3),
+		glm::vec3(0, 0, -1)
+		);
+
+	MVP = Projection * View * Model;
+	glUniformMatrix4fv(Matrix_ID, 1, GL_FALSE, &MVP[0][0]);
+
+
+	int * gb_route = ((ACOMethod*)sip)->gb_route->route;
+	GLuint gbindexbuffer;
+	glGenBuffers(1, &gbindexbuffer);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, gbindexbuffer);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, city_num * sizeof(int), gb_route, GL_STATIC_DRAW);
+
+	GLuint pointsbuffer;
+	glGenBuffers(1, &pointsbuffer);
+	glBindBuffer(GL_ARRAY_BUFFER, pointsbuffer);
+	glBufferData(GL_ARRAY_BUFFER, city_pos.size() * sizeof(int), &city_pos[0], GL_STATIC_DRAW);
+
+	GLuint vPos = glGetAttribLocation(program_ID, "vertexPosition_modelspace_2d");
 	glEnableVertexAttribArray(vPos);
-	glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer);
+	glBindBuffer(GL_ARRAY_BUFFER, pointsbuffer);
 	glVertexAttribPointer(
 		vPos,
-		vSize,
-		GL_FLOAT,
-		GL_FALSE,
-		0,
-		(void*)0
+		2,
+		GL_INT,
+		GL_FALSE,           // normalized?
+		0,                  // stride
+		(void*)0            // array buffer offset
 		);
 
-	GLuint vColor = glGetAttribLocation(program_ID, "vertexColor");
-	glEnableVertexAttribArray(vColor);
-	glBindBuffer(GL_ARRAY_BUFFER, color_buffer);
-	glVertexAttribPointer(
-		vColor,
-		3,
-		GL_FLOAT,
-		GL_FALSE,
-		0,
-		(void*)0
-		);
+	glUniform1i(draw_flag_ID, 2);
+	glUniform1i(color_flag_ID, BLACK);
+	glPointSize(3.0);
+	glDrawArrays(GL_POINTS, 0, city_num);
 
-	switch (mode)
-	{
-	case GL_POINTS:
-		glPointSize(width);
-		break;
-	case GL_LINES:
-		glLineWidth(width);
-		break;
-	}
-	glDrawArrays(mode, 0, size);
+	
+	glLineWidth(3.0f);
+	for (int i = 0; i < city_pos.size(); i += 2)
+		drawCircle_XZ(city_pos[i], city_pos[i + 1], 3);
 
+	glUniform1i(color_flag_ID, RED);
+	drawCircle_XZ(city_pos[0], city_pos[1], 5);
+	//drawCircle_XZ(city_pos[city_pos.size() - 2], city_pos[city_pos.size() - 1], 5);
+
+	glDeleteBuffers(1, &gbindexbuffer);
+	glDeleteBuffers(1, &pointsbuffer);
 	glDisableVertexAttribArray(vPos);
-	glDisableVertexAttribArray(vColor);
+
+	vector<int> gb_route_arr;
+	for (int i = 0; i < city_num; ++i)
+	{
+		int ci = gb_route[i];
+		gb_route_arr.push_back(city_pos[2 * ci]);
+		gb_route_arr.push_back(city_pos[2 * ci+1]);
+	}
+
+	glUniform1i(color_flag_ID, RED);
+	glLineWidth(2.5);
+	drawLines(gb_route_arr);
+
+	glUniform1i(color_flag_ID, BLUE);
+	glLineWidth(1.0);
+	for (int x = 0; x < ((ACOMethod*)sip)->a_num; ++x)
+	{
+		vector<int> route_arr;
+		int * route = ((ACOMethod*)sip)->routes[x]->route;
+		for (int i = 0; i < city_num; ++i)
+		{
+			int ci = route[i];
+			route_arr.push_back(city_pos[2 * ci]);
+			route_arr.push_back(city_pos[2 * ci + 1]);
+		}
+		drawLines(route_arr);
+	}
+	
+
 }
+
 
 void Renderer::drawAxis()
 {
@@ -285,8 +439,8 @@ void Renderer::drawCovery()
 
 	Projection = glm::perspective(70.0f, 4.0f / 3.0f, 0.1f, (float)scale * 5);
 	View = glm::lookAt(
-		glm::vec3(scale/2 - InputFactor.degx/3, 10*InputFactor.radius, scale/2 - InputFactor.degy/3),
-		glm::vec3(scale/2 - InputFactor.degx/3, 0, scale / 2 - InputFactor.degy/3),
+		glm::vec3(scale / 2 - InputFactor.degx / 3, 10 * InputFactor.radius, scale / 2 - InputFactor.degy / 3),
+		glm::vec3(scale / 2 - InputFactor.degx / 3, 0, scale / 2 - InputFactor.degy / 3),
 		glm::vec3(0, 0, -1)
 		);
 
@@ -308,7 +462,7 @@ void Renderer::drawCovery()
 	glUniform1i(draw_flag_ID, 2);
 	glUniform1i(color_flag_ID, BLACK);
 	glLineWidth(1.0f);
-	glDrawArrays(GL_LINES, 0, scale *4);
+	glDrawArrays(GL_LINES, 0, scale * 4);
 
 	glDisableVertexAttribArray(vPos);
 	glUniform1i(color_flag_ID, RED);
@@ -322,143 +476,36 @@ void Renderer::drawCovery()
 	}
 }
 
-int Renderer::doRender() 
-{
-	glClearColor(0.9f, 0.9f, 0.9f, 0.0f);
-	do {
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		glUseProgram(program_ID);
-		View = glm::lookAt(
-			glm::vec3(
-				InputFactor.radius*cos(InputFactor.f_a2r*InputFactor.degx),
-				InputFactor.h*pos_scale, 
-				InputFactor.radius*sin(InputFactor.f_a2r*InputFactor.degx)
-),
-			glm::vec3(0, 0, 0),
-			glm::vec3(0, 1, 0)
-			);
-		MVP = Projection * View * Model;
-		glUniformMatrix4fv(Matrix_ID, 1, GL_FALSE, &MVP[0][0]);
-
-		switch (draw_type)
-		{
-		case DRAW_2D_XZ:
-			drawAxis();
-			draw2Dspace();
-			break;
-			
-		case DRAW_3D:
-			drawAxis();
-			draw3Dspace();
-			break;
-
-		case DRAR_COVERAGE:
-			drawCovery();
-			break;
-
-		default:
-			return 1;
-
-		}
-
-		glfwSwapBuffers(window);
-		glfwPollEvents();
-
-	} while (alive);
-
-	glDeleteBuffers(1, &axisbuffer);
-	glDeleteBuffers(1, &vertexbuffer);
-	glDeleteBuffers(1, &valuebuffer);
-	glDeleteBuffers(1, &gridbuffer);
-	glDeleteVertexArrays(1, &VertexArrayID);
-	glDeleteProgram(program_ID);
-	delete[] p_color;
-	glfwTerminate();
-
-	return 0;
-}
-
-void Renderer::kill()
-{
-	alive = false;
-}
-
-bool Renderer::gl_config() {
-	if (!glfwInit())
-	{
-		fprintf(stderr, "Failed to initialize GLFW\n");
-		getchar();
-		return false;
-	}
-
-	glfwWindowHint(GLFW_SAMPLES, 4);
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-	//glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE); // To make MacOS happy; should not be needed
-	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-
-	window = glfwCreateWindow(800, 600, "Visualiation SI", NULL, NULL);
-	if (window == NULL) {
-		fprintf(stderr,
-			"Failed to open GLFW window. If you have an Intel GPU, they are not 3.3 compatible. Try the 2.1 version of the tutorials.\n");
-		getchar();
-		glfwTerminate();
-		return false;;
-	}
-	glfwMakeContextCurrent(window);
-
-	glewExperimental = true; // Needed for core profile
-	if (glewInit() != GLEW_OK) {
-		fprintf(stderr, "Failed to initialize GLEW\n");
-		getchar();
-		glfwTerminate();
-		return false;;
-	}
-
-	glfwSetInputMode(window, GLFW_STICKY_KEYS, GL_TRUE);
-	glGenVertexArrays(1, &VertexArrayID);
-	glBindVertexArray(VertexArrayID);
-	glEnable(GL_DEPTH_TEST);
-	glDepthFunc(GL_LESS);
-	glfwSetMouseButtonCallback(window, mouseClick);
-	glfwSetCursorPosCallback(window, mouseMove);
-	glfwSetScrollCallback(window, mouseScroll);
-
-	program_ID = LoadShaders(VERTEX_SHADER_FILE, FRAGMENT_SHADER_FILE);
-
-	Matrix_ID = glGetUniformLocation(program_ID, "MVP");
-	draw_flag_ID = glGetUniformLocation(program_ID, "draw_flag");
-	color_flag_ID = glGetUniformLocation(program_ID, "color_flag");
-	gb_value_ID = glGetUniformLocation(program_ID, "gb_value");
-	scale_ID = glGetUniformLocation(program_ID, "scale");
-	return true;
-}
-
-void Renderer::printM(glm::mat4 m)
-{
-	for (int i = 0; i < 4; ++i) 
-	{
-		for (int j = 0; j < 4; ++j)
-			printf("%f ", m[i][j]);
-		printf("\n");
-	}
-}
-
-void Renderer::drawTSP()
-{
-
-}
-
-
-
 void Renderer::drawPathPlanning()
 {
 
 }
 
-void Renderer::drawLines()
+void Renderer::drawLines(vector<int>& vec)
 {
+	GLuint pointsbuffer;
+	glGenBuffers(1, &pointsbuffer);
+	glBindBuffer(GL_ARRAY_BUFFER, pointsbuffer);
+	glBufferData(GL_ARRAY_BUFFER, vec.size() * sizeof(int), &vec[0], GL_STATIC_DRAW);
 
+	GLuint vPos = glGetAttribLocation(program_ID, "vertexPosition_modelspace_2d");
+	glEnableVertexAttribArray(vPos);
+	glBindBuffer(GL_ARRAY_BUFFER, pointsbuffer);
+	glVertexAttribPointer(
+		vPos,
+		2,
+		GL_INT,
+		GL_FALSE,           // normalized?
+		0,                  // stride
+		(void*)0            // array buffer offset
+		);
+
+	glUniform1i(draw_flag_ID, 2);
+
+	glDrawArrays(GL_LINE_STRIP, 0, vec.size()/2);
+
+	glDisableVertexAttribArray(vPos);
+	glDeleteBuffers(1, &pointsbuffer);
 }
 
 void Renderer::drawCircle_XZ(float x, float y, float radius)
@@ -474,7 +521,7 @@ void Renderer::drawCircle_XZ(float x, float y, float radius)
 
 	GLuint circlebuffer;
 	glGenBuffers(1, &circlebuffer);
-	glBindBuffer(GL_ARRAY_BUFFER,circlebuffer);
+	glBindBuffer(GL_ARRAY_BUFFER, circlebuffer);
 	glBufferData(GL_ARRAY_BUFFER, sides * 2 * sizeof(GLfloat), verts, GL_STATIC_DRAW);
 
 	GLuint vPos = glGetAttribLocation(program_ID, "vertexPosition_modelspace_2d");
@@ -496,4 +543,64 @@ void Renderer::drawCircle_XZ(float x, float y, float radius)
 	glDeleteBuffers(1, &circlebuffer);
 
 	glDisableVertexAttribArray(vPos);
+}
+
+void Renderer::drawArray(
+	int type,
+	GLuint &vertex_buffer,
+	GLuint &color_buffer,
+	int size, GLenum mode,
+	float width)
+{
+	glUniform1i(draw_flag_ID, type);
+	GLuint vPos = 0;
+	int vSize = 3;
+	switch (type)
+	{
+	case DRAW_3D:
+		vPos = glGetAttribLocation(program_ID, "vertexPosition_modelspace");
+		vSize = 3;
+		break;
+
+	case DRAW_2D_XZ:
+		vPos = glGetAttribLocation(program_ID, "vertexPosition_modelspace_2d");
+		vSize = 2;
+	}
+
+	glEnableVertexAttribArray(vPos);
+	glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer);
+	glVertexAttribPointer(
+		vPos,
+		vSize,
+		GL_FLOAT,
+		GL_FALSE,
+		0,
+		(void*)0
+		);
+
+	GLuint vColor = glGetAttribLocation(program_ID, "vertexColor");
+	glEnableVertexAttribArray(vColor);
+	glBindBuffer(GL_ARRAY_BUFFER, color_buffer);
+	glVertexAttribPointer(
+		vColor,
+		3,
+		GL_FLOAT,
+		GL_FALSE,
+		0,
+		(void*)0
+		);
+
+	switch (mode)
+	{
+	case GL_POINTS:
+		glPointSize(width);
+		break;
+	case GL_LINES:
+		glLineWidth(width);
+		break;
+	}
+	glDrawArrays(mode, 0, size);
+
+	glDisableVertexAttribArray(vPos);
+	glDisableVertexAttribArray(vColor);
 }

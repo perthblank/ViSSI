@@ -39,6 +39,9 @@
     <ClCompile Include="..\src\renderer.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\aco_method.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\control_panel_3d.h">

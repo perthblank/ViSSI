@@ -14,10 +14,35 @@ public:
 		is_running(false), 
 		alive(true){}
 
-	virtual bool iterate(bool, int) = 0;
+	virtual bool iterate(bool force, int t)
+	{
 
-	virtual bool is_OK() = 0;
+		if (!alive)
+		{
+			return false;
+		}
 
+		if (!force)
+		{
+			if (!is_running) return true;
+		}
+
+		for (int i = 0; i < t; ++i)
+		{
+			if (current_t++ > max_t) return false;
+			iterate_do();
+		}
+
+		return true;
+
+	};
+
+	virtual void iterate_do() = 0;
+
+	virtual bool is_OK()
+	{
+		return is_ok;
+	}
 	float * getPosArr() 
 	{
 		return position_a;

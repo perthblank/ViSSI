@@ -141,50 +141,63 @@ void Controler::setMethod(
 		delete fitness_f;
 	}
 
-	PSOConfig * pconfig = (PSOConfig*)config;
-
-	pconfig->dim = dim;
-
-	if (!strcmp(fitness_function, ff_Eggholder)) 
-	{
-		fitness_f = new Eggholder_function(dim);
-		if (dim == 2)
-			draw_type = DRAW_2D_XZ;
-		else
-			draw_type = DRAW_3D;
-		pconfig->pos_scale = 512.0;
-	}
-	else if (!strcmp(fitness_function, ff_Sphere))
-	{
-		fitness_f = new Sphere_function(dim);
-		if (dim == 2)
-			draw_type = DRAW_2D_XZ;
-		else
-			draw_type = DRAW_3D;
-		pconfig->pos_scale = 2.0;
-	}
-	else if (!strcmp(fitness_function, ff_GoldsteinPrice))
+	if (!strcmp(method, METHOD_LABELS.PSO))
 	{
 
-	}
-	
-	else if (!strcmp(fitness_function, ff_Coverage))
-	{
-		int node_num = 10;
-		int scale = 30;
-		fitness_f = new Coverage_function(node_num, 2, scale);
-		draw_type = DRAR_COVERAGE;
-		pconfig->dim = node_num * 2;
-		pconfig->pos_scale = scale;
-	}
+		PSOConfig * pconfig = (PSOConfig*)config;
 
-	if (!strcmp(method, "PSO")) 
-	{	
+		pconfig->dim = dim;
+
+		if (!strcmp(fitness_function, ff_Eggholder)) 
+		{
+			fitness_f = new Eggholder_function(dim);
+			if (dim == 2)
+				draw_type = DRAW_2D_XZ;
+			else
+				draw_type = DRAW_3D;
+			pconfig->pos_scale = 512.0;
+		}
+		else if (!strcmp(fitness_function, ff_Sphere))
+		{
+			fitness_f = new Sphere_function(dim);
+			if (dim == 2)
+				draw_type = DRAW_2D_XZ;
+			else
+				draw_type = DRAW_3D;
+			pconfig->pos_scale = 2.0;
+		}
+		else if (!strcmp(fitness_function, ff_GoldsteinPrice))
+		{
+
+		}
+		else if (!strcmp(fitness_function, ff_Coverage))
+		{
+			int node_num = 10;
+			int scale = 30;
+			fitness_f = new Coverage_function(node_num, 2, scale);
+			draw_type = DRAW_COVERAGE;
+			pconfig->dim = node_num * 2;
+			pconfig->pos_scale = scale;
+		}
+
+
 		sip = new PSOMethod(pconfig, fitness_f);
 		if (!sip->is_OK())
 			throw;
 		population = pconfig->population;
 		pos_scale = pconfig->pos_scale;
+	}
+
+	else if (!strcmp(method, METHOD_LABELS.ACO))
+	{
+		sip = new ACOMethod(20,100);
+
+		if (!strcmp(fitness_function, ff_TSP))
+		{
+			draw_type = DRAW_TSP;
+		}
+		pos_scale = 100;
+		population = 20;
 	}
 
 }
@@ -216,6 +229,7 @@ void Controler::destroyCurrent()
 	delete rderp;
 	sip = 0;
 	rderp = 0;
+	iter_gap = 270;
 }
 
 void Controler::moveView(int op, float diff)

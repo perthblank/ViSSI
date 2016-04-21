@@ -13,20 +13,24 @@ using namespace glm;
 
 #include <Windows.h>
 #include <process.h>
+#include <vector>
+
 #include "render_control.h"
 #include "shader.hpp"
 #include "si_method.h"
+#include "aco_method.h"
 
 #define DRAW_3D 1
 #define DRAW_2D_XZ 2
-#define DRAR_TSP 3
-#define DRAR_COVERAGE 4
-#define DRAR_PATHP 5
-#define DRAR_LINES 6
+#define DRAW_TSP 3
+#define DRAW_COVERAGE 4
+#define DRAW_PATHP 5
+#define DRAW_LINES 6
 
 #define DEFAULT 0
 #define BLACK 1
 #define RED 2
+#define BLUE 3
 #define DIFF_BASED 10
 
 #define VERTEX_SHADER_FILE  "..\\src\\TransformVertexShader.glsl"
@@ -59,7 +63,7 @@ public:
 
 	void drawPathPlanning();
 
-	void drawLines();
+	void drawLines(vector<int>&);
 
 private:
 

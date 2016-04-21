@@ -27,6 +27,10 @@ void main(){
 	{ //red
 		fragmentColor = vec3(1.0,0,0);
 	}
+	else if(color_flag == 3)
+	{ //blue
+		fragmentColor = vec3(0.0,0,1.0);
+	}
 	else if(color_flag ==10)
 	{ //value-diff-based mode
 		float diff = abs(vertexValue-gb_value)/scale;

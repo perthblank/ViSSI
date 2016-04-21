@@ -36,9 +36,7 @@ public:
 
 	~PSOMethod();
 
-	virtual bool iterate(bool force, int t);
-
-	bool is_OK();
+	virtual void iterate_do();
 
 private:
 

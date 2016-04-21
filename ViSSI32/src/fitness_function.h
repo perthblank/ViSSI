@@ -9,8 +9,8 @@
 #define ff_Eggholder "Eggholder_function"
 #define ff_Sphere "Sphere_function"
 #define ff_GoldsteinPrice "GoldsteinPrice_function"
-#define ff_Coverage "Continuous_Covery"
-
+#define ff_Coverage "Continuous_Coverage"
+#define ff_TSP "Discrete_TSP"
 
 class FitnessFunction {
 public:

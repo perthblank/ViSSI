@@ -149,6 +149,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="..\src\aco_method.cpp" />
     <ClCompile Include="..\src\controler.cpp" />
     <ClCompile Include="..\src\control_panel_3d.cpp" />
     <ClCompile Include="..\src\mainapp.cpp" />

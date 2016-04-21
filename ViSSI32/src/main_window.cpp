@@ -245,6 +245,7 @@ void cb_start(Fl_Widget *c, void *)
 	}
 	else if (!strcmp(COD_LABELS.Discrete, model_type))
 	{
+		fitness_function = choice_discrete_model->text();
 	}
 
 	try {

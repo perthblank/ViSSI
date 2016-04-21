@@ -74,36 +74,14 @@ PSOMethod::~PSOMethod()
 	delete fitness_f;
 }
 
-bool PSOMethod::iterate(bool force, int t)
+void PSOMethod::iterate_do()
 {
-	
-	if (!alive)
-	{
-		return false;
+	for (unsigned pi = 0; pi < population; ++pi) {
+		update_velocity(pi);
+		update_position(pi);
+		evaluate_fitness(pi);
 	}
 
-	if (!force)
-	{
-		if (!is_running) return true;
-	}
-
-	for (int i = 0; i < t; ++i)
-	{
-		if (current_t++ > max_t) return false;
-		for (unsigned pi = 0; pi < population; ++pi) {
-			update_velocity(pi);
-			update_position(pi);
-			evaluate_fitness(pi);
-		}
-	}
-
-	return true;
-}
-
-
-bool PSOMethod::is_OK()
-{
-	return is_ok;
 }
 
 inline float * PSOMethod::loc(float * arr, const unsigned& id)
