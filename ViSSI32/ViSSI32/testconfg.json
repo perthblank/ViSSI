@@ -1,0 +1,21 @@
+{
+"mode":"Continuous",
+"method":1,
+"method_config":
+	{
+		"population": 50,
+		"scale":400,
+		"max_t":300,
+		"wof":1,
+		"wof_value":0.8,
+		"c1":0.8,
+		"c2":1.2
+	},
+
+"model":"Continuous_Benchmark",
+"model_config":
+	{
+		"function":"Sphere_function",
+		"dim":3
+	}
+}

@@ -62,7 +62,7 @@ int setCp3d() {
 		cp3d_window->box(FL_ENGRAVED_BOX);
 		cp3d_window->color((Fl_Color)43);
 		cp3d_window->selection_color((Fl_Color)43);
-		cp3d_window->callback((Fl_Callback*)cb_close);
+		cp3d_window->callback((Fl_Callback*)cb_close_cp3d);
 		{
 			Fl_Box* o = new Fl_Box(10, 10, 555, 370, "Control Panel");
 			o->box(FL_THIN_DOWN_BOX);
@@ -283,7 +283,7 @@ void update_process(void *)
 	}
 }
 
-void cb_close(Fl_Widget *, void *)
+void cb_close_cp3d(Fl_Widget *, void *)
 {
 	main_window->show();
 	cp3d_window->hide();

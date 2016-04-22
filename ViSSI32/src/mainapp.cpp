@@ -19,8 +19,6 @@ void destroyAll()
 	delete config_table;
 }
 
-
-
 int main(int argc, char **argv)
 {
 	srand(time(0));

@@ -181,7 +181,7 @@ void Controler::setMethod(
 
 		sip = new PSOMethod(pconfig, fitness_f);
 		if (!sip->is_OK())
-			throw;
+			throw 1;
 		population = pconfig->population;
 		pos_scale = pconfig->pos_scale;
 	}

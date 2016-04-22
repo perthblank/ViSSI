@@ -54,6 +54,8 @@ Fl_Group *group_adv = (Fl_Group *)0;
 
 Fl_Button *btn_adv_load = (Fl_Button *)0;
 
+Fl_Group *group_config_si = 0;
+
 Fl_Choice *choice_method = (Fl_Choice *)0;
 
 Fl_Group *group_config_pso = (Fl_Group *)0;
@@ -100,6 +102,14 @@ Fl_File_Chooser *fc_tsp_file = 0;
 
 Fl_Input *inp_tsp_file = 0;
 
+Fl_Text_Display *text_adv_config;
+
+Fl_Text_Buffer *buffer_adv_config;
+
+Fl_Input *inp_adv_config_file;
+
+map<string, int> map_counti_benchmark_index;
+
 
 int strToInt(string s)
 {
@@ -137,8 +147,11 @@ bool initCountiModelChoice()
 
 bool initBenchmarkChoice()
 {
+	int i = 0;
 	choice_counti_benchmark_func->add(ff_Eggholder);
+	map_counti_benchmark_index[ff_Eggholder] = i++;
 	choice_counti_benchmark_func->add(ff_Sphere);
+	map_counti_benchmark_index[ff_Sphere] = i++;
 	//choice_counti_benchmark_func->add("GoldsteinPrice_function ");
 	choice_counti_benchmark_func->value(1);
 	return true;
@@ -146,6 +159,9 @@ bool initBenchmarkChoice()
 
 bool initMethodChoice(int flag)
 {
+	group_config_si->show();
+	group_adv->hide();
+	tabs_model->resize(20, 60, 575, 245);
 	switch (flag)
 	{
 	case CONTINUOUS:
@@ -163,6 +179,9 @@ bool initMethodChoice(int flag)
 		break;
 
 	default:
+		group_config_si->hide();
+		group_adv->show();
+		tabs_model->resize(20, 60, 575, 450);
 		break;
 	}
 
@@ -193,6 +212,7 @@ void cb_counti_model(Fl_Choice *c, void*)
 	setMethodOptions(c->text());
 }
 
+
 void cb_model_tabs(Fl_Widget *wt, void *)
 {
 	Fl_Tabs * tabs = (Fl_Tabs *)wt;
@@ -209,6 +229,87 @@ void cb_model_tabs(Fl_Widget *wt, void *)
 	{
 		initMethodChoice(0);
 	}
+}
+
+void loadConfigFile()
+{
+	const char * filename = inp_adv_config_file->value();
+	if (!strcmp(filename,""))
+		return;
+
+	Json::Reader reader;
+	Json::Value root;
+	std::ifstream is;
+	is.open(filename, std::ios::binary);
+
+	if (reader.parse(is, root))
+	{
+		string mode = root["mode"].asString();
+		string model = root["model"].asString();
+		int method_ind = root["method"].asInt();
+		if (!strcmp(mode.c_str(), COD_LABELS.Countinuous))
+		{
+			group_adv->hide();
+			group_counti->show();
+			initMethodChoice(CONTINUOUS);
+
+			if (! config_table->isValidConfig(model, 1, method_ind))
+			{
+				throw 1;
+			}
+			if (!strcmp(model.c_str(), MODEL_LABELS.Continuous_benchmark))
+			{
+				choice_counti_model->value(0);
+				cout << map_counti_benchmark_index[root["model_config"]["function"].asString()] << endl;
+				choice_counti_benchmark_func->value(
+					map_counti_benchmark_index[root["model_config"]["function"].asString()]
+					);
+
+				rbtn_counti_benchmark_2d->value(0);
+				rbtn_counti_benchmark_3d->value(0);
+				if (root["model_config"]["dim"].asInt() == 2)
+					rbtn_counti_benchmark_2d->set();
+				else
+					rbtn_counti_benchmark_3d->set();
+			}
+		}
+		else if (!strcmp(mode.c_str(), COD_LABELS.Countinuous))
+		{
+			group_adv->hide();
+			group_discrete->show();
+			initMethodChoice(DISCRETE);
+		}
+		else
+		{
+			throw 1;
+		}
+
+		string method = config_table->method_map[method_ind];
+		if (!strcmp(method.c_str(), METHOD_LABELS.PSO))
+		{
+			inp_pso_popSize->value(root["method_config"]["population"].asString().c_str());
+			inp_pso_spcScale->value(root["method_config"]["scale"].asString().c_str());
+			inp_pso_c1->value(root["method_config"]["c1"].asString().c_str());
+			inp_pso_c2->value(root["method_config"]["c2"].asString().c_str());
+			inp_pso_wValue->value(root["method_config"]["wof_value"].asString().c_str());
+			inp_pso_maxT->value(root["method_config"]["max_t"].asString().c_str());
+
+			rbtn_pso_consFactor->value(0);
+			rbtn_pso_inerWeight->value(0);
+			if (root["method_config"]["wof"] == 1)
+				rbtn_pso_inerWeight->value(1);
+			else
+				rbtn_pso_consFactor->value(1);
+
+		}
+	}
+	else
+	{
+		cout << "cannot parse file " << filename << endl;
+		//alertMsg("Config File Not Valid!");
+		throw 1;
+	}
+	is.close();
 }
 
 void initConfig()
@@ -302,20 +403,26 @@ void cb_start(Fl_Widget *c, void *)
 	{
 		fitness_function = choice_discrete_model->text();
 	}
+	else
+	{
+		loadConfigFile();
+		return;
+	}
 
-	try {
+	try
+	{
 		main_controler->setMethod(method.c_str(), config, fitness_function.c_str(), dim);
 	}
 	catch (...)
 	{
-		cout << "parameter error" << endl;
-		alertMsg("parameter error");
+		//cout << "parameter error" << endl;
+		alertMsg("Parameter Error");
 		return;
 	}
 	main_controler->run();
 	main_window->hide();
 	setCp3d();
-	
+
 }
 
 void cb_show_tsp_fc()
@@ -324,7 +431,8 @@ void cb_show_tsp_fc()
 
 	fc_tsp_file->show();
 
-	while (fc_tsp_file->visible()) {
+	while (fc_tsp_file->visible())
+	{
 		Fl::wait();
 	}
 
@@ -339,11 +447,29 @@ void cb_show_tsp_fc()
 				break;
 
 			fl_filename_relative(file_path, sizeof(file_path), fc_tsp_file->value(i));
-
 			inp_tsp_file->value(file_path);
 		}
 
 		inp_tsp_file->redraw();
+	}
+}
+
+void cb_show_adv_fc()
+{
+	char file_path[FL_PATH_MAX];
+
+	fc_tsp_file->show();
+
+	while (fc_tsp_file->visible())
+	{
+		Fl::wait();
+	}
+	int count = fc_tsp_file->count();
+	if (count > 0)
+	{
+		fl_filename_relative(file_path, sizeof(file_path), fc_tsp_file->value(1));
+		buffer_adv_config->loadfile(file_path);
+		inp_adv_config_file->value(file_path);
 	}
 }
 
@@ -372,14 +498,12 @@ void cb_method()
 int setWindow(int argc, char **argv) {
 	{
 		main_window = new Fl_Double_Window(611, 612, "VSSI_main");
+		main_window->callback(cb_close_main_window);
+
 		{
-
 			Fl_Box* o = new Fl_Box(10, 22, 130, 35, "Problem Model");
-
 			o->labeltype(FL_ENGRAVED_LABEL);
-
 			o->labelfont(1);
-
 		} // Fl_Box* o
 
 		{
@@ -530,19 +654,23 @@ int setWindow(int argc, char **argv) {
 			} // Fl_Group* group_discrete
 
 			{
-				group_adv = new Fl_Group(20, 85, 570, 220, "Advance");
+				group_adv = new Fl_Group(20, 85, 570, 500, "Advance");
 				group_adv->selection_color((Fl_Color)29);
-				group_adv->hide();
+				
 
 				{
-					Fl_Scroll* o = new Fl_Scroll(35, 110, 450, 190, "Problem Description");
-					o->box(FL_SHADOW_BOX);
-					o->end();
+					text_adv_config = new Fl_Text_Display(35, 110, 450, 220, "Problem Config");
+					buffer_adv_config = new Fl_Text_Buffer();
+					text_adv_config->buffer(buffer_adv_config);
+					//buffer_adv_config->loadfile("..\\src\\config\\cities.json");
+
 				} // Fl_Scroll* o
 
 				{
-					btn_adv_load = new Fl_Button(495, 265, 90, 30, "Load...");
-					btn_adv_load->callback((Fl_Callback*)callback);
+					btn_adv_load = new Fl_Button(35, 340, 90, 25, "Load...");
+					btn_adv_load->callback((Fl_Callback*)cb_show_adv_fc);
+					inp_adv_config_file = new Fl_Input(130, 340, 300, 25);
+
 				} // Fl_Button* btn_adv_load
 
 				group_adv->end();
@@ -554,94 +682,102 @@ int setWindow(int argc, char **argv) {
 		} // Fl_Tabs* tabs_model
 
 		{
-			Fl_Box* o = new Fl_Box(17, 325, 210, 35, "Swarm Intelligence Method");
-			o->labeltype(FL_ENGRAVED_LABEL);
-			o->labelfont(1);
-		} // Fl_Box* o
-
-		{
-			choice_method = new Fl_Choice(85, 359, 185, 24, "method:");
-			choice_method->down_box(FL_BORDER_BOX);
-			choice_method->callback((Fl_Callback*)cb_method);
-		} // Fl_Choice* choice_method
-
-		{
-			group_config_pso = new Fl_Group(30, 390, 560, 140);
-			group_config_pso->box(FL_EMBOSSED_BOX);
-			group_config_pso->labeltype(FL_SHADOW_LABEL);
+			group_config_si = new Fl_Group(15, 325, 590, 220);
 
 			{
-				inp_pso_popSize = new Fl_Input(150, 401, 160, 25, "Population Size:");
-			} // Fl_Input* inp_pso_popSize
+				Fl_Box* o = new Fl_Box(17, 325, 210, 35, "Swarm Intelligence Method");
+				o->labeltype(FL_ENGRAVED_LABEL);
+				o->labelfont(1);
+			} // Fl_Box* o
 
 			{
-				inp_pso_spcScale = new Fl_Input(150, 432, 160, 25, "Space Sacle:");
-			} // Fl_Input* inp_pso_spcScale
+				choice_method = new Fl_Choice(85, 359, 185, 24, "method:");
+				choice_method->down_box(FL_BORDER_BOX);
+				choice_method->callback((Fl_Callback*)cb_method);
+			} // Fl_Choice* choice_method
 
 			{
-				inp_pso_maxT = new Fl_Input(150, 465, 160, 25, "Max Iterations:");
-			}
-
-			{
-				inp_pso_wValue = new Fl_Input(400, 440, 115, 25, "w/f:");
-			} // Fl_Input* inp_pso_wValue
-
-			{
-				inp_pso_c1 = new Fl_Input(400, 460, 115, 25, "c1:");
-			} // Fl_Input* inp_pso_c1
-
-			{
-				inp_pso_c2 = new Fl_Input(400, 484, 115, 25, "c2:");
-			} // Fl_Input* inp_pso_c2
-
-			{
-				rgroup_pso_mode = new Fl_Group(375, 390, 170, 50);
-				rgroup_pso_mode->box(FL_THIN_UP_FRAME);
+				group_config_pso = new Fl_Group(30, 390, 560, 140);
+				group_config_pso->box(FL_EMBOSSED_BOX);
+				group_config_pso->labeltype(FL_SHADOW_LABEL);
 
 				{
-					rbtn_pso_consFactor = new Fl_Round_Button(385, 390, 155, 30, "constriciton factor");
-					rbtn_pso_consFactor->type(102);
-					rbtn_pso_consFactor->down_box(FL_ROUND_DOWN_BOX);
-					rbtn_pso_consFactor->callback((Fl_Callback*)callback);
-					rbtn_pso_consFactor->set();
-				} // Fl_Round_Button* rbtn_pso_consFactor
+					inp_pso_popSize = new Fl_Input(150, 401, 160, 25, "Population Size:");
+				} // Fl_Input* inp_pso_popSize
 
 				{
-					rbtn_pso_inerWeight = new Fl_Round_Button(385, 410, 155, 25, "inertia weight");
-					rbtn_pso_inerWeight->type(102);
-					rbtn_pso_inerWeight->down_box(FL_ROUND_DOWN_BOX);
-					rbtn_pso_inerWeight->callback((Fl_Callback*)callback);
-				} // Fl_Round_Button* rbtn_pso_inerWeight
+					inp_pso_spcScale = new Fl_Input(150, 432, 160, 25, "Space Sacle:");
+				} // Fl_Input* inp_pso_spcScale
 
-				rgroup_pso_mode->end();
-			} // Fl_Group* rgroup_pso_mode
+				{
+					inp_pso_maxT = new Fl_Input(150, 465, 160, 25, "Max Iterations:");
+				}
 
-			group_config_pso->end();
-		} // Fl_Group* group_config_pso
+				{
+					inp_pso_wValue = new Fl_Input(400, 440, 115, 25, "w/f:");
+				} // Fl_Input* inp_pso_wValue
 
-		{
-			group_config_aco = new Fl_Group(30, 390, 560, 140);
-			group_config_aco->box(FL_EMBOSSED_BOX);
-			group_config_aco->labeltype(FL_SHADOW_LABEL);
+				{
+					inp_pso_c1 = new Fl_Input(400, 460, 115, 25, "c1:");
+				} // Fl_Input* inp_pso_c1
 
-			inp_aco_popSize = new Fl_Input(150, 401, 160, 25, "Population Size:");
-			inp_aco_maxT = new Fl_Input(150, 432, 160, 25, "Max Iterations:");
-			inp_aco_T0 = new Fl_Input(150, 465, 160, 25, "Pher0:");
-			inp_aco_P0 = new Fl_Input(150, 497, 160, 25, "Prob0:");
+				{
+					inp_pso_c2 = new Fl_Input(400, 484, 115, 25, "c2:");
+				} // Fl_Input* inp_pso_c2
 
-			group_config_aco->end();
-		}// Fl_Group* group_config_aco
+				{
+					rgroup_pso_mode = new Fl_Group(375, 390, 170, 50);
+					rgroup_pso_mode->box(FL_THIN_UP_FRAME);
 
-		{
-			group_config_pso_discrete = new Fl_Group(30, 390, 560, 140);
-			group_config_pso_discrete->box(FL_EMBOSSED_BOX);
-			group_config_pso_discrete->labeltype(FL_SHADOW_LABEL);
+					{
+						rbtn_pso_consFactor = new Fl_Round_Button(385, 390, 155, 30, "constriciton factor");
+						rbtn_pso_consFactor->type(102);
+						rbtn_pso_consFactor->down_box(FL_ROUND_DOWN_BOX);
+						rbtn_pso_consFactor->callback((Fl_Callback*)callback);
+						rbtn_pso_consFactor->set();
+					} // Fl_Round_Button* rbtn_pso_consFactor
+
+					{
+						rbtn_pso_inerWeight = new Fl_Round_Button(385, 410, 155, 25, "inertia weight");
+						rbtn_pso_inerWeight->type(102);
+						rbtn_pso_inerWeight->down_box(FL_ROUND_DOWN_BOX);
+						rbtn_pso_inerWeight->callback((Fl_Callback*)callback);
+					} // Fl_Round_Button* rbtn_pso_inerWeight
+
+					rgroup_pso_mode->end();
+				} // Fl_Group* rgroup_pso_mode
+
+				group_config_pso->end();
+
+
+			} // Fl_Group* group_config_pso
+
+			{
+				group_config_aco = new Fl_Group(30, 390, 560, 140);
+				group_config_aco->box(FL_EMBOSSED_BOX);
+				group_config_aco->labeltype(FL_SHADOW_LABEL);
+
+				inp_aco_popSize = new Fl_Input(150, 401, 160, 25, "Population Size:");
+				inp_aco_maxT = new Fl_Input(150, 432, 160, 25, "Max Iterations:");
+				inp_aco_T0 = new Fl_Input(150, 465, 160, 25, "Pher0:");
+				inp_aco_P0 = new Fl_Input(150, 497, 160, 25, "Prob0:");
+
+				group_config_aco->end();
+			}// Fl_Group* group_config_aco
+
+			{
+				group_config_pso_discrete = new Fl_Group(30, 390, 560, 140);
+				group_config_pso_discrete->box(FL_EMBOSSED_BOX);
+				group_config_pso_discrete->labeltype(FL_SHADOW_LABEL);
 
 
 
-			group_config_pso_discrete->end();
-	
-		}// Fl_Group* group_config_pso_discrete
+				group_config_pso_discrete->end();
+
+			}// Fl_Group* group_config_pso_discrete
+
+			group_config_si->end();
+		} //group_config_si
 
 		{
 			btn_start = new Fl_Button(30, 560, 80, 30, "Start");
@@ -666,22 +802,18 @@ int setWindow(int argc, char **argv) {
 	} // Fl_Double_Window* main_window
 
 	{
-		fc_tsp_file = new Fl_File_Chooser(".", "*", Fl_File_Chooser::SINGLE, "Choose TSP Config File");
+		fc_tsp_file = new Fl_File_Chooser(".", "*", Fl_File_Chooser::SINGLE, "Choose Config File");
 		//fc_tsp_file->callback(fc_callback);
 		fc_tsp_file->filter("JSON File (*.json)\t");
 	}
 
+
 	initCountiModelChoice();
-
 	initMethodChoice(CONTINUOUS);
-
 	initConfig();
-
 	initAlert();
 
 	main_window->show(argc, argv);
-
-	main_window->callback(cb_close_main_window);
 
 	return Fl::run();
 }
@@ -689,6 +821,7 @@ int setWindow(int argc, char **argv) {
 void cb_close_main_window(Fl_Widget *, void *)
 {
 	destroyAlert();
+	main_window->hide();
 	Fl::delete_widget(main_window);
 }
 

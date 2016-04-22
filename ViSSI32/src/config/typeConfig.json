@@ -68,6 +68,12 @@
 			"cod":2,
 			"method":[2,4],
 			"visual":[8]
+		},
+		{
+			"model":"Path_Planning",
+			"cod":2,
+			"method":[2],
+			"visual":[8]
 		}
 	]
 }

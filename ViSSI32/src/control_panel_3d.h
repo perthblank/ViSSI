@@ -21,7 +21,7 @@ void cb_speed_slider(Fl_Widget *o, void *);
 
 void update_process(void *);
 
-void cb_close(Fl_Widget *o, void *);
+void cb_close_cp3d(Fl_Widget *o, void *);
 
 void cb_view_roll(Fl_Widget *, void *);
 

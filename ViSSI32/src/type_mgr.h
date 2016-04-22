@@ -26,7 +26,7 @@ class ModelOption
 public:
 	int methods = 0;
 	int visuals = 0;
-	int type;
+	int type = -1;
 
 	void addMethod(int mt)
 	{
@@ -178,9 +178,14 @@ public:
 		return 0;
 	}
 
-private:
+	bool isValidConfig(string model, int mode, int method)
+	{
+		return model_map[model].methods&method && model_map[model].type==mode;
+	}
+
 
 	TypeMap method_map, visual_map, cod_map;
+
 	ModelMap model_map;
 
 };

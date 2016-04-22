@@ -33,6 +33,8 @@ void getConfig(PSOConfig *config);
 
 void cb_show_tsp_fc();
 
+void cb_show_adv_fc();
+
 void cb_method();
 
 void cb_close_main_window(Fl_Widget *, void *);

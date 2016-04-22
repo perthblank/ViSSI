@@ -39,7 +39,7 @@ PSOMethod::PSOMethod(PSOConfig* config,
 	population(config->population), dim(config->dim), pos_scale(config->pos_scale)
 {
 	is_ok = false;
-	if (!fitness_f->is_dim_valid(dim)) return;
+	if (!fitness_f || !fitness_f->is_dim_valid(dim)) return;
 
 	msize = population*dim;
 	position_a = new float[msize];

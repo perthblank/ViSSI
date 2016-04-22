@@ -28,6 +28,7 @@ struct COD_LABELSCLASS
 {
 	const char * Countinuous = "Continuous";
 	const char * Discrete = "Discrete";
+	const char * Advance = "Advance";
 };
 
 struct MODEL_LABELSCLASS
