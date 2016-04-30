@@ -5,6 +5,7 @@
 #include <windows.h> 
 #include <string>
 #include <sstream>
+#include <vector>
 
 using namespace std;
 
@@ -56,6 +57,41 @@ public:
 		a = b;
 		b = tmp;
 	}
+
+	static bool inVec(vector<int> &vec, const int& i)
+	{
+		vector<int>::iterator it = vec.begin();
+		while (it != vec.end())
+			if (*it++ == i)
+				return true;
+
+		return false;
+	}
+
+	static float rand01()
+	{
+		return rand() % 100 * 0.01;
+	}
+
+	static int wheelGame(vector<float> probs)
+	{
+		float prob = Util::rand01();
+		for (int i = 0; i < probs.size(); ++i)
+		{
+			//cout << probs[i] << endl;
+			prob -= probs[i];
+			if (prob <= 0)
+				return i;
+		}
+		return -1; // probs not valid
+	}
+
+	static bool equalf(float a, float b)
+	{
+		return (a - b < 0.000001);
+	}
+
+
 };
 
 

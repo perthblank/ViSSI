@@ -110,6 +110,7 @@ Fl_Input *inp_adv_config_file;
 
 map<string, int> map_counti_benchmark_index;
 
+#define LABEL_ViSSI_MAIN "ViSSI"
 
 int strToInt(string s)
 {
@@ -152,7 +153,9 @@ bool initBenchmarkChoice()
 	map_counti_benchmark_index[ff_Eggholder] = i++;
 	choice_counti_benchmark_func->add(ff_Sphere);
 	map_counti_benchmark_index[ff_Sphere] = i++;
-	//choice_counti_benchmark_func->add("GoldsteinPrice_function ");
+	choice_counti_benchmark_func->add(ff_HolderTable);
+	map_counti_benchmark_index[ff_HolderTable] = i++;
+
 	choice_counti_benchmark_func->value(1);
 	return true;
 }
@@ -497,7 +500,7 @@ void cb_method()
 
 int setWindow(int argc, char **argv) {
 	{
-		main_window = new Fl_Double_Window(611, 612, "VSSI_main");
+		main_window = new Fl_Double_Window(611, 612, LABEL_ViSSI_MAIN);
 		main_window->callback(cb_close_main_window);
 
 		{

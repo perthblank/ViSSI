@@ -19,6 +19,7 @@ using namespace glm;
 #include "shader.hpp"
 #include "si_method.h"
 #include "aco_method.h"
+#include "aco_path.h"
 
 #define DRAW_3D 1
 #define DRAW_2D_XZ 2
@@ -83,6 +84,8 @@ private:
 
 	void drawCircle_XZ(float x, float y, float radius);
 
+	void drawSqure(int x, int y);
+
 	bool is_ok;
 
 	int draw_type;
@@ -121,7 +124,7 @@ private:
 
 	GLuint valuebuffer;
 
-	GLuint gridbuffer;
+	GLuint gridbuffer, squrebuffer;
 
 	GLuint VertexArrayID;
 

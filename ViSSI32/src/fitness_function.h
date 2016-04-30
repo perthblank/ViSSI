@@ -8,9 +8,13 @@
 
 #define ff_Eggholder "Eggholder_function"
 #define ff_Sphere "Sphere_function"
+#define ff_HolderTable "HolderTable_function"
 #define ff_GoldsteinPrice "GoldsteinPrice_function"
 #define ff_Coverage "Continuous_Coverage"
 #define ff_TSP "Discrete_TSP"
+#define ff_PATH "Path_Planning"
+
+#define PI 3.1415
 
 class FitnessFunction {
 public:
@@ -63,18 +67,16 @@ public:
 	}
 };
 
-class GoldsteinPrice_function : public FitnessFunction
+class HolderTable_function : public FitnessFunction
 {
 public:
-	GoldsteinPrice_function() :FitnessFunction(FIND_MIN, 2) {}
+	HolderTable_function() :FitnessFunction(FIND_MIN, 2) {}
 
 	float operator() (const float* pos) 
 	{
 		float x = pos[0], y = pos[1];
 
-		float sum = 0;
-
-		return sum;
+		return -abs(sin(x)*cos(y)*exp(abs(1 - sqrt(x*x + y*y) / PI)));
 	}
 
 	bool is_dim_valid(unsigned dim)

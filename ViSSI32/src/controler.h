@@ -10,6 +10,7 @@ using namespace std;
 
 #include "pso_method.h"
 #include "aco_method.h"
+#include "aco_path.h"
 #include "renderer.h"
 #include "vssi_util.h"
 

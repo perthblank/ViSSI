@@ -37,10 +37,12 @@ public:
 class PSOMethod:public SIMethod 
 {
 public:
+	/*
 	PSOMethod(unsigned population, unsigned dim, float pos_scale,
 		msize_t max_t,
 		FitnessFunction* fitness_f
 		);
+		*/
 
 	PSOMethod(PSOConfig* config,
 		FitnessFunction* fitness_f

@@ -43,6 +43,7 @@ public:
 	{
 		return is_ok;
 	}
+
 	float * getPosArr() 
 	{
 		return position_a;

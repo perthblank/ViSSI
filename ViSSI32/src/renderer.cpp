@@ -1,11 +1,11 @@
 #include"renderer.h"
 
 Renderer::Renderer(
-	unsigned population, 
-	GLfloat pos_scale, 
+	unsigned population,
+	GLfloat pos_scale,
 	SIMethod * sip,
-	int draw_type):
-	p_num(population),draw_type(draw_type),sip(sip), pos_scale(pos_scale)
+	int draw_type) :
+	p_num(population), draw_type(draw_type), sip(sip), pos_scale(pos_scale)
 {
 	InputFactor.refreshView();
 
@@ -59,18 +59,16 @@ Renderer::Renderer(
 	glBindBuffer(GL_ARRAY_BUFFER, valuebuffer);
 	glBufferData(GL_ARRAY_BUFFER, population * sizeof(GLfloat), p_value, GL_STATIC_DRAW);
 
-	if (draw_type == DRAW_COVERAGE )
+	if (draw_type == DRAW_COVERAGE || draw_type == DRAW_PATHP)
 	{
 		Model = glm::mat4();
-
-		Coverage_function * cf = (Coverage_function*)sip->getFitnessFunction();
-		const int & scale = cf->scale;
+		const int & scale = pos_scale;
 		InputFactor.radius = 1.0;
-		GLfloat *grid = new GLfloat[scale * 8];
+		GLfloat *grid = new GLfloat[scale * 8 + 8];
 
 		int i = 0;
 		int j = 0;
-		for (; i < scale * 4-3; i += 4)
+		for (; i < scale * 4 + 1; i += 4)
 		{
 			grid[i] = j;
 			grid[i + 1] = 0;
@@ -78,8 +76,9 @@ Renderer::Renderer(
 			grid[i + 3] = scale;
 			++j;
 		}
+
 		j = 0;
-		for (; i < scale * 8-3; i += 4)
+		for (; i < scale * 8 + 5; i += 4)
 		{
 			grid[i] = 0;
 			grid[i + 1] = j;
@@ -90,9 +89,40 @@ Renderer::Renderer(
 
 		glGenBuffers(1, &gridbuffer);
 		glBindBuffer(GL_ARRAY_BUFFER, gridbuffer);
-		glBufferData(GL_ARRAY_BUFFER, scale * 8 * sizeof(GLfloat), grid, GL_STATIC_DRAW);
+		glBufferData(GL_ARRAY_BUFFER, (scale * 8 + 8) * sizeof(GLfloat), grid, GL_STATIC_DRAW);
 
 		delete[] grid;
+
+		if (draw_type == DRAW_PATHP)
+		{
+			ACO_PathPlan *aco_path = (ACO_PathPlan*)sip;
+			const int &scale = aco_path->scale;
+			vector<int> squres;
+			bool ** map = aco_path->map;
+			for (int x = 0; x < scale; ++x)
+				for (int y = 0; y < scale; ++y)
+				{
+					if (map[x][y])
+					{
+						squres.push_back(x);
+						squres.push_back(y);
+						squres.push_back(x + 1);
+						squres.push_back(y);
+						squres.push_back(x + 1);
+						squres.push_back(y + 1);
+						squres.push_back(x);
+						squres.push_back(y);
+						squres.push_back(x);
+						squres.push_back(y + 1);
+						squres.push_back(x + 1);
+						squres.push_back(y + 1);
+					}
+				}
+			glGenBuffers(1, &squrebuffer);
+			glBindBuffer(GL_ARRAY_BUFFER, squrebuffer);
+			glBufferData(GL_ARRAY_BUFFER, squres.size() * sizeof(int), &squres[0], GL_STATIC_DRAW);
+
+		}
 	}
 	else if (draw_type == DRAW_TSP)
 	{
@@ -103,18 +133,18 @@ Renderer::Renderer(
 	alive = true;
 }
 
-Renderer::~Renderer() 
+Renderer::~Renderer()
 {
 
 }
 
-bool Renderer::is_OK() 
+bool Renderer::is_OK()
 {
 	return is_ok;
 }
 
 
-int Renderer::doRender() 
+int Renderer::doRender()
 {
 	glClearColor(0.9f, 0.9f, 0.9f, 0.0f);
 	do {
@@ -123,9 +153,9 @@ int Renderer::doRender()
 		View = glm::lookAt(
 			glm::vec3(
 				InputFactor.radius*cos(InputFactor.f_a2r*InputFactor.degx),
-				InputFactor.h*pos_scale, 
+				InputFactor.h*pos_scale,
 				InputFactor.radius*sin(InputFactor.f_a2r*InputFactor.degx)
-),
+				),
 			glm::vec3(0, 0, 0),
 			glm::vec3(0, 1, 0)
 			);
@@ -138,7 +168,7 @@ int Renderer::doRender()
 			drawAxis();
 			draw2Dspace();
 			break;
-			
+
 		case DRAW_3D:
 			drawAxis();
 			draw3Dspace();
@@ -149,8 +179,12 @@ int Renderer::doRender()
 			break;
 
 		case DRAW_TSP:
-			
+
 			drawTSP();
+			break;
+
+		case DRAW_PATHP:
+			drawPathPlanning();
 			break;
 
 		default:
@@ -167,6 +201,7 @@ int Renderer::doRender()
 	glDeleteBuffers(1, &vertexbuffer);
 	glDeleteBuffers(1, &valuebuffer);
 	glDeleteBuffers(1, &gridbuffer);
+	glDeleteBuffers(1, &squrebuffer);
 	glDeleteVertexArrays(1, &VertexArrayID);
 	glDeleteProgram(program_ID);
 
@@ -233,7 +268,7 @@ bool Renderer::gl_config() {
 
 void Renderer::printM(glm::mat4 m)
 {
-	for (int i = 0; i < 4; ++i) 
+	for (int i = 0; i < 4; ++i)
 	{
 		for (int j = 0; j < 4; ++j)
 			printf("%f ", m[i][j]);
@@ -245,7 +280,7 @@ void Renderer::drawTSP()
 {
 
 	vector<int> & city_pos = ((ACOMethod*)sip)->tsp_function->coords;
-	int city_num = city_pos.size()/2;
+	int city_num = city_pos.size() / 2;
 	int scale = 30;
 
 
@@ -290,14 +325,13 @@ void Renderer::drawTSP()
 	glPointSize(3.0);
 	glDrawArrays(GL_POINTS, 0, city_num);
 
-	
+
 	glLineWidth(3.0f);
 	for (int i = 0; i < city_pos.size(); i += 2)
 		drawCircle_XZ(city_pos[i], city_pos[i + 1], 3);
 
 	glUniform1i(color_flag_ID, RED);
 	drawCircle_XZ(city_pos[0], city_pos[1], 5);
-	//drawCircle_XZ(city_pos[city_pos.size() - 2], city_pos[city_pos.size() - 1], 5);
 
 	glDeleteBuffers(1, &gbindexbuffer);
 	glDeleteBuffers(1, &pointsbuffer);
@@ -308,7 +342,7 @@ void Renderer::drawTSP()
 	{
 		int ci = gb_route[i];
 		gb_route_arr.push_back(city_pos[2 * ci]);
-		gb_route_arr.push_back(city_pos[2 * ci+1]);
+		gb_route_arr.push_back(city_pos[2 * ci + 1]);
 	}
 
 	glUniform1i(color_flag_ID, RED);
@@ -329,8 +363,6 @@ void Renderer::drawTSP()
 		}
 		drawLines(route_arr);
 	}
-	
-
 }
 
 
@@ -462,7 +494,7 @@ void Renderer::drawCovery()
 	glUniform1i(draw_flag_ID, 2);
 	glUniform1i(color_flag_ID, BLACK);
 	glLineWidth(1.0f);
-	glDrawArrays(GL_LINES, 0, scale * 4);
+	glDrawArrays(GL_LINES, 0, scale * 4 + 4);
 
 	glDisableVertexAttribArray(vPos);
 	glUniform1i(color_flag_ID, RED);
@@ -478,11 +510,72 @@ void Renderer::drawCovery()
 
 void Renderer::drawPathPlanning()
 {
+	ACO_PathPlan *aco_path = (ACO_PathPlan*)sip;
+
+	Model = glm::mat4();
+	Projection = glm::perspective(70.0f, 4.0f / 3.0f, 0.1f, (float)pos_scale * 15);
+	View = glm::lookAt(
+		glm::vec3(pos_scale / 2 - InputFactor.degx / 3, InputFactor.radius, pos_scale / 2 - InputFactor.degy / 3),
+		glm::vec3(pos_scale / 2 - InputFactor.degx / 3, 0, pos_scale / 2 - InputFactor.degy / 3),
+		glm::vec3(0, 0, -1)
+		);
+
+	MVP = Projection * View * Model;
+	glUniformMatrix4fv(Matrix_ID, 1, GL_FALSE, &MVP[0][0]);
+
+	GLuint vPos = glGetAttribLocation(program_ID, "vertexPosition_modelspace_2d");
+	glEnableVertexAttribArray(vPos);
+	glBindBuffer(GL_ARRAY_BUFFER, gridbuffer);
+	glVertexAttribPointer(
+		vPos,
+		2,
+		GL_FLOAT,
+		GL_FALSE,           // normalized?
+		0,                  // stride
+		(void*)0            // array buffer offset
+		);
+
+	glUniform1i(draw_flag_ID, 2);
+	glUniform1i(color_flag_ID, BLACK);
+	glLineWidth(1.0f);
+	glDrawArrays(GL_LINES, 0, this->pos_scale * 4 + 4);
+
+	glBindBuffer(GL_ARRAY_BUFFER, squrebuffer);
+	glVertexAttribPointer(
+		vPos,
+		2,
+		GL_INT,
+		GL_FALSE,
+		0,
+		(void*)0
+		);
+	glDrawArrays(GL_TRIANGLES, 0, aco_path->ob_num*2*3);
+
+	Model = glm::translate(Model, glm::vec3(1.0/2.0,0, 1.0/2.0));
+	MVP = Projection * View * Model;
+	glUniformMatrix4fv(Matrix_ID, 1, GL_FALSE, &MVP[0][0]);
+
+	glUniform1i(color_flag_ID, RED);
+	glLineWidth(2.5);
+	vector<int> gb;
+	aco_path->getRouteArr(gb, -1);
+	drawLines(gb);
+
+	glUniform1i(color_flag_ID, BLUE);
+	glLineWidth(1.0);
+	for (int x = 0; x < aco_path->a_num; ++x)
+	{
+		vector<int> route_arr;
+		aco_path->getRouteArr(route_arr, x);
+		drawLines(route_arr);
+	}
 
 }
 
 void Renderer::drawLines(vector<int>& vec)
 {
+	if (vec.size() == 0)return;
+
 	GLuint pointsbuffer;
 	glGenBuffers(1, &pointsbuffer);
 	glBindBuffer(GL_ARRAY_BUFFER, pointsbuffer);
@@ -502,7 +595,7 @@ void Renderer::drawLines(vector<int>& vec)
 
 	glUniform1i(draw_flag_ID, 2);
 
-	glDrawArrays(GL_LINE_STRIP, 0, vec.size()/2);
+	glDrawArrays(GL_LINE_STRIP, 0, vec.size() / 2);
 
 	glDisableVertexAttribArray(vPos);
 	glDeleteBuffers(1, &pointsbuffer);
@@ -543,6 +636,12 @@ void Renderer::drawCircle_XZ(float x, float y, float radius)
 	glDeleteBuffers(1, &circlebuffer);
 
 	glDisableVertexAttribArray(vPos);
+}
+
+
+void Renderer::drawSqure(int x, int y)
+{
+
 }
 
 void Renderer::drawArray(

@@ -164,9 +164,11 @@ void Controler::setMethod(
 				draw_type = DRAW_3D;
 			pconfig->pos_scale = 2.0;
 		}
-		else if (!strcmp(fitness_function, ff_GoldsteinPrice))
+		else if (!strcmp(fitness_function, ff_HolderTable))
 		{
-
+			fitness_f = new Sphere_function(dim);
+			draw_type = DRAW_2D_XZ;
+			pconfig->pos_scale = 10.0;
 		}
 		else if (!strcmp(fitness_function, ff_Coverage))
 		{
@@ -177,7 +179,7 @@ void Controler::setMethod(
 			pconfig->dim = cconfig->numOfNode * 2;
 			pconfig->pos_scale = cconfig->scale;
 		}
-
+		
 
 		sip = new PSOMethod(pconfig, fitness_f);
 		if (!sip->is_OK())
@@ -188,15 +190,23 @@ void Controler::setMethod(
 
 	else if (!strcmp(method, METHOD_LABELS.ACO))
 	{
-		ACOConfig * aconfig = (ACOConfig*)config;
-		sip = new ACOMethod(aconfig);
 
 		if (!strcmp(fitness_function, ff_TSP))
 		{
 			draw_type = DRAW_TSP;
+			ACOConfig * aconfig = (ACOConfig*)config;
+			sip = new ACOMethod(aconfig);
+			pos_scale = 100;
+			population = 20;
 		}
-		pos_scale = 100;
-		population = 20;
+		else if (!strcmp(fitness_function, ff_PATH))
+		{
+			sip = new ACO_PathPlan(10,1,30);
+			draw_type = DRAW_PATHP;
+			pos_scale = 10;
+			population = 5;
+		}
+
 	}
 
 }

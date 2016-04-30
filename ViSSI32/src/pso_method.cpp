@@ -1,6 +1,7 @@
 #include "mainh.h"
 #include "pso_method.h"
 
+/*
 PSOMethod::PSOMethod(unsigned population, unsigned dim, float pos_scale,
 	msize_t max_t,
 	FitnessFunction* fitness_f
@@ -31,6 +32,7 @@ PSOMethod::PSOMethod(unsigned population, unsigned dim, float pos_scale,
 
 	is_ok = true;
 }
+*/
 
 PSOMethod::PSOMethod(PSOConfig* config,
 	FitnessFunction* fitness_f

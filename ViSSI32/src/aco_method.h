@@ -96,7 +96,7 @@ public:
 class Route
 {
 public:
-	Route() :c_num(0), route(NULL)
+	Route() :c_num(0), route(NULL),value(0)
 	{}
 
 	Route(int size, TSP_function * func) :c_num(size), route(NULL)
