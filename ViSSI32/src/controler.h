@@ -36,6 +36,8 @@ struct MODEL_LABELSCLASS
 {
 	const char * Continuous_benchmark = "Continuous_Benchmark";
 	const char * Continuous_coverage = ff_Coverage;
+	const char * Discrete_TSP = "Discrete_TSP";
+	const char * Path_Planning = "Path_Planning";
 };
 
 #define GOOD 0

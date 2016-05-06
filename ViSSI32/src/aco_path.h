@@ -11,7 +11,6 @@
 #include <map>
 using namespace std;
 
-
 class Ant
 {
 public:
@@ -23,6 +22,8 @@ public:
 
 	void clear()
 	{
+		while (in_use);
+
 		tabu.clear();
 		is_done = false;
 		cur_length = 0;
@@ -56,6 +57,7 @@ public:
 	float cur_length = 0;
 	static const float len_of_dir[];
 	static const int move[][2];
+	bool in_use = false;;
 };
 
 
@@ -104,6 +106,11 @@ public:
 	void getRouteArr(vector<int> &v, int x);
 
 	float ita_function(int i);
+
+	virtual float getGBValue()
+	{
+		return gbest.cur_length;
+	}
 
 	int xC(int i);
 

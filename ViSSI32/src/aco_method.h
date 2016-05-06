@@ -23,7 +23,7 @@ public:
 	float T0;
 	float P0;
 	const char * path;
-
+	int value;
 	ACOConfig(const char *path) : path(path)
 	{}
 };

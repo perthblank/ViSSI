@@ -36,6 +36,10 @@ Fl_Choice *choice_discrete_model = (Fl_Choice *)0;
 
 Fl_Group *group_discrete_seq = (Fl_Group *)0;
 
+Fl_Group *group_discrete_path = (Fl_Group *)0;
+
+Fl_Input *inp_path_scale = (Fl_Input *)0;
+
 Fl_Choice *choice_discrete_seq_func = (Fl_Choice *)0;
 
 Fl_Button *btn_discrete_tspConfig = (Fl_Button *)0;
@@ -215,6 +219,22 @@ void cb_counti_model(Fl_Choice *c, void*)
 	setMethodOptions(c->text());
 }
 
+void cb_discrete_model(Fl_Choice *c, void*)
+{
+	if (c->value() == 0)
+	{
+		group_discrete_seq->show();
+		group_discrete_path->hide();
+	}
+	else
+	{
+		group_discrete_seq->hide();
+		group_discrete_path->show();
+	}
+
+	setMethodOptions(c->text());
+}
+
 
 void cb_model_tabs(Fl_Widget *wt, void *)
 {
@@ -276,7 +296,7 @@ void loadConfigFile()
 					rbtn_counti_benchmark_3d->set();
 			}
 		}
-		else if (!strcmp(mode.c_str(), COD_LABELS.Countinuous))
+		else if (!strcmp(mode.c_str(), COD_LABELS.Discrete))
 		{
 			group_adv->hide();
 			group_discrete->show();
@@ -328,10 +348,12 @@ void initConfig()
 	inp_coverage_radius->value("3.5");
 	inp_coverage_Scale->value("20");
 
-	inp_aco_popSize->value("20");
+	inp_aco_popSize->value("5");
 	inp_aco_maxT->value("100");
 	inp_aco_T0->value("190");
 	inp_aco_P0->value("0.7");
+
+	inp_path_scale->value("100");
 }
 
 
@@ -353,6 +375,7 @@ void getConfig(ACOConfig *config)
 	config->max_t = strToInt(inp_aco_maxT->value());
 	config->P0 = strToFloat(inp_aco_P0->value());
 	config->T0 = strToFloat(inp_aco_T0->value());
+	config->value = strToInt(inp_path_scale->value());
 }
 
 void getConfig(CoverageConfig * config)
@@ -375,8 +398,8 @@ void cb_start(Fl_Widget *c, void *)
 		getConfig((PSOConfig*)config);
 	}
 	else if (!strcmp(choice_method->text(), METHOD_LABELS.ACO)) {
-		if (!inp_tsp_file->value())
-			return;
+		//if (!inp_tsp_file->value())
+		//	return;
 		config = new ACOConfig(inp_tsp_file->value());
 		getConfig((ACOConfig*)config);
 	}
@@ -405,6 +428,7 @@ void cb_start(Fl_Widget *c, void *)
 	else if (!strcmp(COD_LABELS.Discrete, model_type))
 	{
 		fitness_function = choice_discrete_model->text();
+		//if(!strcmp(fitness_function, ))
 	}
 	else
 	{
@@ -594,7 +618,7 @@ int setWindow(int argc, char **argv) {
 				{
 					choice_discrete_model = new Fl_Choice(73, 100, 205, 25, "Model:");
 					choice_discrete_model->down_box(FL_BORDER_BOX);
-					choice_discrete_model->callback((Fl_Callback*)callback);
+					choice_discrete_model->callback((Fl_Callback*)cb_discrete_model);
 				} // Fl_Choice* choice_discrete_model
 
 				{
@@ -634,7 +658,19 @@ int setWindow(int argc, char **argv) {
 				} // Fl_Group* group_discrete_seq
 
 				{
-					rgroup_discrete_draw_mode = new Fl_Group(50, 255, 260, 31);
+					group_discrete_path = new Fl_Group(38, 140, 495, 150);
+					group_discrete_path->box(FL_EMBOSSED_BOX);
+
+					{
+						inp_path_scale = new Fl_Input(150, 161, 100, 24, "Grid Scale:");
+					}
+
+					group_discrete_path->end();
+					group_discrete_path->hide();
+				}
+
+				{
+					//rgroup_discrete_draw_mode = new Fl_Group(50, 255, 260, 31);
 					//rgroup_discrete_draw_mode->box(FL_THIN_UP_FRAME);
 
 					//{
@@ -751,7 +787,6 @@ int setWindow(int argc, char **argv) {
 				} // Fl_Group* rgroup_pso_mode
 
 				group_config_pso->end();
-
 
 			} // Fl_Group* group_config_pso
 

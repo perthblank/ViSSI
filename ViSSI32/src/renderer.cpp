@@ -184,7 +184,14 @@ int Renderer::doRender()
 			break;
 
 		case DRAW_PATHP:
-			drawPathPlanning();
+			try
+			{
+				drawPathPlanning();
+			}
+			catch (...)
+			{
+				printf("occur...\n");
+			}
 			break;
 
 		default:
@@ -522,6 +529,15 @@ void Renderer::drawPathPlanning()
 
 	MVP = Projection * View * Model;
 	glUniformMatrix4fv(Matrix_ID, 1, GL_FALSE, &MVP[0][0]);
+
+	//glUniform1i(color_flag_ID, BLUE);
+	//glLineWidth(1.0);
+	//for (int x = 0; x < aco_path->a_num; ++x)
+	//{
+	//	vector<int> route_arr;
+	//	aco_path->getRouteArr(route_arr, x);
+	//	drawLines(route_arr);
+	//}
 
 	GLuint vPos = glGetAttribLocation(program_ID, "vertexPosition_modelspace_2d");
 	glEnableVertexAttribArray(vPos);

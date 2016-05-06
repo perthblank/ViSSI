@@ -190,21 +190,20 @@ void Controler::setMethod(
 
 	else if (!strcmp(method, METHOD_LABELS.ACO))
 	{
-
+		ACOConfig * aconfig = (ACOConfig*)config;
 		if (!strcmp(fitness_function, ff_TSP))
 		{
 			draw_type = DRAW_TSP;
-			ACOConfig * aconfig = (ACOConfig*)config;
 			sip = new ACOMethod(aconfig);
 			pos_scale = 100;
 			population = 20;
 		}
 		else if (!strcmp(fitness_function, ff_PATH))
 		{
-			sip = new ACO_PathPlan(10,1,30);
-			draw_type = DRAW_PATHP;
-			pos_scale = 10;
-			population = 5;
+			pos_scale = aconfig->value;
+			population = aconfig->population;
+			sip = new ACO_PathPlan(pos_scale,population,50);
+			draw_type = DRAW_PATHP;			
 		}
 
 	}

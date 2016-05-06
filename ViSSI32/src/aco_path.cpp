@@ -47,7 +47,7 @@ ACO_PathPlan::ACO_PathPlan(int scale, int a_num, int max_t)
 	g_begin = 0;
 	g_end = grid_num - 1;
 	
-	printMap();
+	//printMap();
 }
 
 
@@ -161,9 +161,11 @@ void ACO_PathPlan::step0()
 
 void ACO_PathPlan::iterate_do()
 {
+	restore();
 	step0();
 	while (true)
 	{
+		
 		int count = 0;
 		for (int x = 0; x < a_num; ++x)
 		{
@@ -198,7 +200,7 @@ void ACO_PathPlan::iterate_do()
 		break;
 	}
 	swapPher();
-	restore();
+
 	//gbest.print();
 }
 
@@ -269,9 +271,11 @@ void ACO_PathPlan::getRouteArr(vector<int> &vec, int x)
 	vec.clear();
 	Ant *antp;
 	antp = (x == -1) ? &gbest : &ants[x];
+	antp->in_use = true;
 	for (int i = 0; i < antp->tabu.size(); ++i)
 	{
 		vec.push_back(xC(antp->tabu[i]));
 		vec.push_back(yC(antp->tabu[i]));
 	}
+	antp->in_use = false;
 }

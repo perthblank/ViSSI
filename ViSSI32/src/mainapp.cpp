@@ -21,7 +21,7 @@ void destroyAll()
 
 int main(int argc, char **argv)
 {
-	srand(time(0));
+	srand(10);
 	initAll();
 	setWindow(argc, argv);
 	destroyAll();

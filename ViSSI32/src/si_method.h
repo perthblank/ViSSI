@@ -62,6 +62,7 @@ public:
 	void togglePlay()
 	{
 		is_running = !is_running;
+		//cout << "toogle" << endl;
 	}
 
 	float getProcessPrecent()
@@ -79,7 +80,7 @@ public:
 		return fitness_f;
 	}
 
-	float getGBValue()
+	virtual float getGBValue()
 	{
 		return gb_val;
 	}
