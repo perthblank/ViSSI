@@ -38,6 +38,11 @@ void adjustView(double x, double y)
 	InputFactor.oldmy += y;
 }
 
+void adjustView(double, double, double r)
+{
+	InputFactor.radius += r;
+}
+
 void mouseScroll(GLFWwindow* window, double xoffset, double yoffset)
 {
 	InputFactor.radius += yoffset * 3;

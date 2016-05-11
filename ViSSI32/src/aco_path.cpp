@@ -50,7 +50,6 @@ ACO_PathPlan::ACO_PathPlan(int scale, int a_num, int max_t)
 	//printMap();
 }
 
-
 ACO_PathPlan::~ACO_PathPlan()
 {
 	for (int i = 0; i < scale; ++i)
@@ -61,8 +60,6 @@ ACO_PathPlan::~ACO_PathPlan()
 	delete[] ants;
 	delete[] pher_new;
 }
-
-
 
 bool ACO_PathPlan::randGrid()
 {
@@ -202,6 +199,21 @@ void ACO_PathPlan::iterate_do()
 	swapPher();
 
 	//gbest.print();
+}
+
+void ACO_PathPlan::save_gbest(const char * name)
+{
+	fstream out(name, ios::out);
+	out << name << endl;
+	out << "Current Global Best Value: " << gbest.cur_length << endl;
+	out << "Current Global Best Rotine:" << endl;
+
+	for (int i = 0; i < gbest.tabu.size(); ++i)
+	{
+		out << gbest.tabu[i] << endl;
+	}
+
+	out.close();
 }
 
 void ACO_PathPlan::evap_pher(float f)

@@ -49,9 +49,9 @@ unsigned int __stdcall Controler::SIThread()
 	return 0;
 }
 
-unsigned int __stdcall Controler::SICross(int t)
+unsigned int __stdcall Controler::SICross()
 {
-	sip->iterate(true, t);
+	sip->iterate(true, this->crossT);
 	return 0;
 }
 
@@ -84,7 +84,8 @@ void Controler::toggleSI()
 
 void Controler::crossSI(int t)
 {
-	thread_proc.Member = &Controler::SIToggle;
+	this->crossT = t;
+	thread_proc.Member = &Controler::SICross;
 	(HANDLE)_beginthreadex(
 		NULL, 0,
 		(_beginthreadex_proc_type)thread_proc.Proc,
@@ -166,7 +167,7 @@ void Controler::setMethod(
 		}
 		else if (!strcmp(fitness_function, ff_HolderTable))
 		{
-			fitness_f = new Sphere_function(dim);
+			fitness_f = new HolderTable_function(dim);
 			draw_type = DRAW_2D_XZ;
 			pconfig->pos_scale = 10.0;
 		}
@@ -225,6 +226,11 @@ float Controler::getFitnessValue()
 	return sip->getGBValue();
 }
 
+int Controler::getIterate()
+{
+	return sip->getIterate();
+}
+
 void Controler::destroyCurrent()
 {
 	sip->kill();
@@ -246,13 +252,20 @@ void Controler::moveView(int op, float diff)
 	switch (op)
 	{
 	case MOVE_X:
-		move = diff*50;
-		adjustView(move, 0);
+		adjustView(diff * 50, 0);
 		break;
 
 	case MOVE_Y:
-		move = diff * 30;
-		adjustView(0, move);
+		adjustView(0, diff * 30);
+		break;
+
+	case MOVE_R:
+		adjustView(0, 0, diff * 20);
 		break;
 	}
+}
+
+void Controler::save_gbest(const char * name)
+{
+	sip->save_gbest(name);
 }

@@ -39,6 +39,8 @@ public:
 
 	virtual void iterate_do() = 0;
 
+	virtual void save_gbest(const char * name) = 0;
+
 	virtual bool is_OK()
 	{
 		return is_ok;
@@ -68,6 +70,11 @@ public:
 	float getProcessPrecent()
 	{
 		return (float)current_t / max_t;
+	}
+
+	int getIterate()
+	{
+		return current_t;
 	}
 
 	void kill()

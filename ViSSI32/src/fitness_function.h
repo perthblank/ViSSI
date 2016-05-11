@@ -70,7 +70,7 @@ public:
 class HolderTable_function : public FitnessFunction
 {
 public:
-	HolderTable_function() :FitnessFunction(FIND_MIN, 2) {}
+	HolderTable_function(int) :FitnessFunction(FIND_MIN, 2) {}
 
 	float operator() (const float* pos) 
 	{

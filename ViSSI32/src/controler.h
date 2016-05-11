@@ -46,6 +46,7 @@ struct MODEL_LABELSCLASS
 
 #define MOVE_X 1
 #define MOVE_Y 2
+#define MOVE_R 3
 
 class Controler {
 public:
@@ -77,9 +78,13 @@ public:
 
 	float getFitnessValue();
 
+	int getIterate();
+
 	void destroyCurrent();
 
 	void moveView(int op, float v);
+
+	void save_gbest(const char*);
 
 private:
 
@@ -109,9 +114,11 @@ private:
 
 	unsigned int __stdcall SIToggle();
 
-	unsigned int __stdcall SICross(int t);
+	unsigned int __stdcall SICross();
 
 	unsigned iter_gap, iter_gap_default = 270;
+
+	int crossT;
 };
 
 #endif

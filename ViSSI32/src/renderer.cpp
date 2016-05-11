@@ -143,33 +143,49 @@ bool Renderer::is_OK()
 	return is_ok;
 }
 
+void Renderer::normal3DView()
+{
+	glUseProgram(program_ID);
+	View = glm::lookAt(
+		glm::vec3(
+			InputFactor.radius*cos(InputFactor.f_a2r*InputFactor.degx),
+			InputFactor.h*pos_scale,
+			InputFactor.radius*sin(InputFactor.f_a2r*InputFactor.degx)
+			),
+		glm::vec3(0, 0, 0),
+		glm::vec3(0, 1, 0)
+		);
+	MVP = Projection * View * Model;
+	glUniformMatrix4fv(Matrix_ID, 1, GL_FALSE, &MVP[0][0]);
+}
 
 int Renderer::doRender()
 {
 	glClearColor(0.9f, 0.9f, 0.9f, 0.0f);
+	double lastTime = glfwGetTime(); 
+	int nbFrames = 0;
 	do {
+
+		double currentTime = glfwGetTime();
+		nbFrames++;
+		if (currentTime - lastTime >= 1.0) { 
+			printf(" ms/frame, frames:%d\n",  nbFrames);
+			nbFrames = 0;
+			lastTime += 1.0;
+		}
+
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		glUseProgram(program_ID);
-		View = glm::lookAt(
-			glm::vec3(
-				InputFactor.radius*cos(InputFactor.f_a2r*InputFactor.degx),
-				InputFactor.h*pos_scale,
-				InputFactor.radius*sin(InputFactor.f_a2r*InputFactor.degx)
-				),
-			glm::vec3(0, 0, 0),
-			glm::vec3(0, 1, 0)
-			);
-		MVP = Projection * View * Model;
-		glUniformMatrix4fv(Matrix_ID, 1, GL_FALSE, &MVP[0][0]);
 
 		switch (draw_type)
 		{
 		case DRAW_2D_XZ:
+			normal3DView();
 			drawAxis();
 			draw2Dspace();
 			break;
 
 		case DRAW_3D:
+			normal3DView();
 			drawAxis();
 			draw3Dspace();
 			break;
@@ -184,6 +200,7 @@ int Renderer::doRender()
 			break;
 
 		case DRAW_PATHP:
+			normal3DView();
 			try
 			{
 				drawPathPlanning();
@@ -348,6 +365,7 @@ void Renderer::drawTSP()
 	for (int i = 0; i < city_num; ++i)
 	{
 		int ci = gb_route[i];
+		if (ci < 0) continue;
 		gb_route_arr.push_back(city_pos[2 * ci]);
 		gb_route_arr.push_back(city_pos[2 * ci + 1]);
 	}
@@ -371,7 +389,6 @@ void Renderer::drawTSP()
 		drawLines(route_arr);
 	}
 }
-
 
 void Renderer::drawAxis()
 {
@@ -505,7 +522,7 @@ void Renderer::drawCovery()
 
 	glDisableVertexAttribArray(vPos);
 	glUniform1i(color_flag_ID, RED);
-	static float * pos =
+	float * pos =
 		//sip->getGBPosArr();
 		p_vertex;
 	glLineWidth(3.0f);

@@ -169,13 +169,26 @@ void ACOMethod::updateAnt(int x)
 
 void ACOMethod::iterate_do()
 {
-
 	for (int x = 0; x < a_num; ++x)
 	{
 		updateAnt(x);
 	}
 	updatePher();
+}
 
+void ACOMethod::save_gbest(const char * name)
+{
+	fstream out(name, ios::out);
+	out << name << endl;
+	out << "Current Global Best Value: " << gb_route->value << endl;
+	out << "Current Global Best Rotine:" << endl;
+
+	for (int i = 0; i < gb_route->c_num; ++i)
+	{
+		out << gb_route->route[i] << endl;
+	}
+
+	out.close();
 }
 
 void ACOMethod::step0()

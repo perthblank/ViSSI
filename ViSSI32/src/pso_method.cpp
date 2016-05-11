@@ -86,6 +86,21 @@ void PSOMethod::iterate_do()
 
 }
 
+
+void PSOMethod::save_gbest(const char* name)
+{
+	fstream out(name, ios::out);
+	out << name << endl;
+	out << "Current Global Best Value: " << gb_val <<endl;
+	out << "Current Global Best Position:" << endl;
+	for (int i = 0; i < dim; ++i)
+		out << gb_pos[i] << endl;
+
+	out.close();
+
+	cout << "saved";
+}
+
 inline float * PSOMethod::loc(float * arr, const unsigned& id)
 {
 	return arr + id*dim;

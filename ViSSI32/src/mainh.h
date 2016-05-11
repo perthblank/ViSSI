@@ -22,6 +22,7 @@
 #include <FL/Fl_Scroll.H>
 #include <FL/Fl_File_Chooser.H>
 #include <FL/Fl_File_Icon.H>
+#include <FL/Fl_Native_File_Chooser.H>
 
 #include <cstdio>
 #include <cstring>

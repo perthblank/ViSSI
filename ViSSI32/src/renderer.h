@@ -66,6 +66,7 @@ public:
 
 	void drawLines(vector<int>&);
 
+
 private:
 
 	void drawArray(
@@ -85,6 +86,8 @@ private:
 	void drawCircle_XZ(float x, float y, float radius);
 
 	void drawSqure(int x, int y);
+
+	void normal3DView();
 
 	bool is_ok;
 

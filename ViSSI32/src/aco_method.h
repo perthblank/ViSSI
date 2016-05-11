@@ -64,7 +64,7 @@ public:
 		else
 		{
 			printf("cannot open file: %s", filename);
-			throw;
+			throw 1;
 			//throw CONFIG_NOT_VALID_EXCEPTION;
 		}
 		is.close();
@@ -279,7 +279,11 @@ public:
 
 	virtual void iterate_do();
 
+	virtual void save_gbest(const char * name);
+
 	int g_function(int x);
+
+
 };
 
 #endif

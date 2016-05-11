@@ -11,11 +11,7 @@ void cb_stop(Fl_Widget *o, void *);
 
 void cb_gotT(Fl_Widget *o, void *);
 
-void cb_camera_roll(Fl_Widget *o, void *);
-
-void cb_xView_roll(Fl_Widget *o, void *);
-
-void cb_yView_roll(Fl_Widget *o, void *);
+void cb_save_gbest(Fl_Widget *o, void *);
 
 void cb_speed_slider(Fl_Widget *o, void *);
 

@@ -3,7 +3,7 @@
 
 #include "mainh.h"
 
-#define DEFAULT_TSP_CONFIG_FILE "..\\src\\config\\cities.json"
+#define DEFAULT_TSP_CONFIG_FILE "..\\ViSSI32\\cities.json"
 
 void callback(Fl_Widget* o, void*);
 

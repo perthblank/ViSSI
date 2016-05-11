@@ -9,6 +9,7 @@
 #include <vector>
 #include <cmath>
 #include <map>
+#include <fstream>
 using namespace std;
 
 class Ant
@@ -117,17 +118,8 @@ public:
 	int yC(int i);
 
 	int xyId(int x, int y);
-/*
-	void iterate()
-	{
-		for (int t = 0; t < 20; ++t)
-		{
-			iterate_do();
-			cout << "-------------------------------------------------\n";
-		}
-		cout << "-----------gbest-------------" << endl;
-		gbest.print();
-	}*/
+
+	virtual void save_gbest(const char * name);
 
 	int g_begin, g_end;
 

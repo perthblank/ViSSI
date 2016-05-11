@@ -45,6 +45,8 @@ void mouseMove(GLFWwindow * window, double x, double y);
 
 void adjustView(double x, double y);
 
+void adjustView(double, double, double);
+
 void mouseScroll(GLFWwindow* window, double xoffset, double yoffset);
 
 #endif

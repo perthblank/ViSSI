@@ -52,6 +52,8 @@ public:
 
 	virtual void iterate_do();
 
+	virtual void save_gbest(const char * name);
+
 private:
 
 	float * velocity_a;

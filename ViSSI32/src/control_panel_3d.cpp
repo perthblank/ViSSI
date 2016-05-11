@@ -6,6 +6,8 @@ static void callback3d(Fl_Widget* o, void*) {
 	fflush(stdout);
 }
 
+
+
 Fl_Group *cp3d_group_proceed = (Fl_Group *)0;
 
 Fl_Button *cp3d_btn_play = (Fl_Button *)0;
@@ -50,10 +52,13 @@ Fl_Double_Window *cp3d_window = 0;
 
 HANDLE update_h = 0;
 
-float roll_viewX_old = 0.5, roll_viewY_old = 0.5;
+float roll_viewX_old = 0.5, roll_viewY_old = 0.5, roll_viewCamera_old = 0.5;
 
-const char * roller_viewX_label = "x-way View";
-const char * roller_viewY_label = "y-way View";
+const char * roller_viewX_label = "X-way View";
+const char * roller_viewY_label = "Y-way View";
+const char * roller_viewCamera_label = "Camera View";
+
+unsigned time_second = 0;
 
 int setCp3d() {
 	
@@ -94,6 +99,7 @@ int setCp3d() {
 			{
 				cp3d_btn_goT = new Fl_Button(255, 75, 40, 35, "@>|");
 				cp3d_btn_goT->labelfont(1);
+				cp3d_btn_goT->callback((Fl_Callback*)cb_gotT);
 			} // Fl_Button* cp3d_btn_goT
 
 			{
@@ -107,9 +113,9 @@ int setCp3d() {
 			cp3d_group_view = new Fl_Group(320, 60, 230, 130, "View");
 			cp3d_group_view->box(FL_ENGRAVED_BOX);
 			{
-				cp3d_roll_camera = new Fl_Roller(365, 75, 21, 90, "camera distance");
+				cp3d_roll_camera = new Fl_Roller(365, 75, 21, 90, roller_viewCamera_label);
 				cp3d_roll_camera->value(0.5);
-				cp3d_roll_camera->callback((Fl_Callback*)callback3d);
+				cp3d_roll_camera->callback((Fl_Callback*)cb_view_roll);
 			} // Fl_Roller* cp3d_roll_camera
 
 			{
@@ -174,42 +180,12 @@ int setCp3d() {
 		} // Fl_Group* cp3d_group_trail
 
 		{
-			cp3d_group_info = new Fl_Group(410, 220, 135, 135, "Info");
-			cp3d_group_info->box(FL_PLASTIC_THIN_DOWN_BOX);
+			cp3d_group_info = new Fl_Group(410, 220, 135, 135, "---");
+			//cp3d_group_info->box(FL_PLASTIC_THIN_DOWN_BOX);
 			{
-				cp3d_inp_id = new Fl_Output(460, 233, 80, 27, "ID:");
-				cp3d_inp_id->box(FL_NO_BOX);
-				cp3d_inp_id->labelsize(11);
-				cp3d_inp_id->textsize(11);
+				Fl_Button *btn_save_gbest = new Fl_Button(420, 275, 130, 27, "Save");
+				btn_save_gbest->callback((Fl_Callback*)cb_save_gbest);
 			} // Fl_Output* cp3d_inp_id
-
-			{
-				cp3d_inp_method = new Fl_Output(460, 293, 80, 27, "method:");
-				cp3d_inp_method->box(FL_NO_BOX);
-				cp3d_inp_method->labelsize(11);
-				cp3d_inp_method->textsize(11);
-			} // Fl_Output* cp3d_inp_method
-
-			{
-				cp3d_inp_assign = new Fl_Output(460, 253, 80, 27, "assign:");
-				cp3d_inp_assign->box(FL_NO_BOX);
-				cp3d_inp_assign->labelsize(11);
-				cp3d_inp_assign->textsize(11);
-			} // Fl_Output* cp3d_inp_assign
-
-			{
-				cp3d_inp_model = new Fl_Output(460, 273, 80, 27, "model:");
-				cp3d_inp_model->box(FL_NO_BOX);
-				cp3d_inp_model->labelsize(11);
-				cp3d_inp_model->textsize(11);
-			} // Fl_Output* cp3d_inp_model
-
-			{
-				cp3d_inp_vType = new Fl_Output(460, 313, 80, 27, "v-type:");
-				cp3d_inp_vType->box(FL_NO_BOX);
-				cp3d_inp_vType->labelsize(11);
-				cp3d_inp_vType->textsize(11);
-			} // Fl_Output* cp3d_inp_vType
 
 			cp3d_group_info->end();
 		} // Fl_Group* cp3d_group_info
@@ -223,6 +199,8 @@ int setCp3d() {
 			(_beginthreadex_proc_type)update_process,
 			0,
 			0, NULL);
+
+	time_second = 0;
 
 	return Fl::run();
 }
@@ -241,35 +219,55 @@ void cb_play(Fl_Widget *o, void *)
 	main_controler->toggleSI();
 }
 
+void cb_save_gbest(Fl_Widget* o, void*) 
+{
+	if (!strcmp(cp3d_btn_play->label(), "@||"))
+	{
+		cb_play(NULL, NULL);
+	}
+
+
+	Fl_Native_File_Chooser native;
+	native.title("Pick a file");
+	native.type(Fl_Native_File_Chooser::BROWSE_FILE);
+	native.filter("Text\t*.txt\n");	
+	// Show native chooser
+	switch (native.show()) {
+	case -1: fprintf(stderr, "ERROR: %s\n", native.errmsg()); break;	// ERROR
+	case  1: fprintf(stderr, "*** CANCEL\n"); fl_beep(); break;		// CANCEL
+	default: 								// PICKED FILE
+		main_controler->save_gbest(native.filename());
+		break;
+	}
+
+	
+}
+
 void cb_stop(Fl_Widget *o, void *)
 {
+	
+}
 
+
+int strToInt2(string s)
+{
+	stringstream ss(s.c_str());
+	int v;
+	ss >> v;
+	return v;
 }
 
 void cb_gotT(Fl_Widget *o, void *)
 {
-
+	int t = strToInt2(cp3d_input_T->value());
+	cout << "cross " << t << endl;
+	main_controler->crossSI(t);
 }
 
 void cb_speed_slider(Fl_Widget *o, void *)
 {
 	//cout << cp3d_slider_speed->value() << endl;
 	main_controler->setSpeed(cp3d_slider_speed->value());
-}
-
-void cb_camera_roll(Fl_Widget *o, void *)
-{
-
-}
-
-void cb_xView_roll(Fl_Widget *o, void *)
-{
-
-}
-
-void cb_yView_roll(Fl_Widget *o, void *)
-{
-
 }
 
 void update_process(void *)
@@ -280,16 +278,19 @@ void update_process(void *)
 	{
 		cp3d_slider_iterate->value(main_controler->getProcessPrecent());
 		cp3d_inp_fitness->value(main_controler->getFitnessValue());
+		cp3d_inp_time->value(main_controler->getIterate());
 	}
+
+	cp3d_window->redraw();
 }
 
 void cb_close_cp3d(Fl_Widget *, void *)
 {
+	TerminateThread(update_h, 0);
 	main_window->show();
 	cp3d_window->hide();
 	Fl::delete_widget(cp3d_window);
 	cp3d_window = 0;
-
 	main_controler->destroyCurrent();
 }
 
@@ -307,5 +308,10 @@ void cb_view_roll(Fl_Widget * o, void *)
 		main_controler->moveView(MOVE_Y, cur - roll_viewY_old);
 		roll_viewY_old = cur;
 	}
-
+	else if (!strcmp(roller->label(), roller_viewCamera_label))
+	{
+		main_controler->moveView(MOVE_R, cur - roll_viewCamera_old);
+		roll_viewCamera_old = cur;
+	}
+	
 }
