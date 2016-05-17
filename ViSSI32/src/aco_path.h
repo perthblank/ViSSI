@@ -10,24 +10,32 @@
 #include <cmath>
 #include <map>
 #include <fstream>
+#include <Windows.h>
 using namespace std;
 
 class Ant
 {
 public:
+	Ant()
+	{
+		mutex = CreateMutex(NULL, false, NULL);
+	}
+
 	void choose(int i, int dir)
 	{
+		WaitForSingleObject(mutex, INFINITE);
 		tabu.push_back(i);
 		cur_length += len_of_dir[dir];
+		ReleaseMutex(mutex);
 	}
 
 	void clear()
 	{
-		while (in_use);
-
+		WaitForSingleObject(mutex, INFINITE);
 		tabu.clear();
 		is_done = false;
 		cur_length = 0;
+		ReleaseMutex(mutex);
 	}
 
 	float getCurrentLength()
@@ -58,7 +66,7 @@ public:
 	float cur_length = 0;
 	static const float len_of_dir[];
 	static const int move[][2];
-	bool in_use = false;;
+	HANDLE mutex;
 };
 
 
@@ -127,9 +135,10 @@ public:
 
 	int a_num;
 
-	float D = 10;;
+	float D = 10;
 
 	Ant * ants;
+
 	Ant gbest;
 
 	bool **map;

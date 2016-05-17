@@ -183,8 +183,14 @@ int setCp3d() {
 			cp3d_group_info = new Fl_Group(410, 220, 135, 135, "---");
 			//cp3d_group_info->box(FL_PLASTIC_THIN_DOWN_BOX);
 			{
-				Fl_Button *btn_save_gbest = new Fl_Button(420, 275, 130, 27, "Save");
+				Fl_Light_Button *btn_toggle_gbest = new Fl_Light_Button(420, 235, 130, 27, "gbest Only");
+				btn_toggle_gbest->selection_color(FL_RED);
+				btn_toggle_gbest->callback((Fl_Callback*)cb_toggle_gbest);
+
+				Fl_Button *btn_save_gbest = new Fl_Button(420, 295, 130, 27, "Save");
 				btn_save_gbest->callback((Fl_Callback*)cb_save_gbest);
+
+				
 			} // Fl_Output* cp3d_inp_id
 
 			cp3d_group_info->end();
@@ -239,15 +245,19 @@ void cb_save_gbest(Fl_Widget* o, void*)
 		main_controler->save_gbest(native.filename());
 		break;
 	}
+}
 
-	
+void cb_toggle_gbest(Fl_Widget* o, void*)
+{
+	//Fl_Light_Button * b = (Fl_Light_Button*)o;
+	//cout << b->ac;
+	main_controler->toggleShowGbestOnly();
 }
 
 void cb_stop(Fl_Widget *o, void *)
 {
 	
 }
-
 
 int strToInt2(string s)
 {

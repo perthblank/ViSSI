@@ -19,7 +19,7 @@
 class FitnessFunction {
 public:
 	FitnessFunction(bool findMax, unsigned dim) :findMax(findMax), dim(dim) {};
-	virtual float operator() (const float* pos) = 0;
+	virtual float operator() ( float* pos) = 0;
 	virtual bool is_dim_valid(unsigned)
 	{
 		return true;
@@ -33,7 +33,7 @@ class Eggholder_function : public FitnessFunction
 public:
 	Eggholder_function(unsigned dim) :FitnessFunction(FIND_MIN, dim) {}
 
-	float operator() (const float* pos) 
+	float operator() ( float* pos) 
 	{
 		const float & x = pos[0];
 		const float & y = pos[1];
@@ -51,7 +51,7 @@ class Sphere_function : public FitnessFunction
 public:
 	Sphere_function(unsigned dim) :FitnessFunction(FIND_MIN, dim) {}
 
-	float operator() (const float* pos) 
+	float operator() ( float* pos) 
 	{
 		float sum = 0;
 		for (int i = 0; i < dim; ++i)
@@ -72,7 +72,7 @@ class HolderTable_function : public FitnessFunction
 public:
 	HolderTable_function(int) :FitnessFunction(FIND_MIN, 2) {}
 
-	float operator() (const float* pos) 
+	float operator() (float* pos) 
 	{
 		float x = pos[0], y = pos[1];
 
@@ -125,36 +125,7 @@ public:
 		}
 	}
 
-	float operator() (const float* pos) 
-	{
-		resetCP();
-		int sum = 0;
-	
-		for (int i = 0; i < p_num; i+=2)
-		{
-			const int &x = pos[i];
-			const int &y = pos[i + 1];
-			for (int m = ceil(x - radius); m < floor(x + radius); ++m)
-			{
-				for (int n = ceil(y - radius); n < floor(y + radius); ++n)
-				{
-					if (m > 0 && m < scale &&n>0 && n < scale)
-					{
-						if (dist(m, n, x, y) <= radius)
-						{
-							if (cp_map[m][n] == 0)
-							{
-								cp_map[m][n] == 1;
-								++sum;
-							}
-						}
-					}
-				}
-			}
-		}
-
-		return sum;
-	}
+	float operator() (float* pos);
 
 	float dist(int x, int y, int m, int n)
 	{

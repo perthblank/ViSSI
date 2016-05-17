@@ -64,6 +64,8 @@ public:
 
 	void toggleSI();
 
+	void toggleShowGbestOnly();
+
 	void crossSI(int);
 
 	void run();

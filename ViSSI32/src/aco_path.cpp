@@ -283,11 +283,11 @@ void ACO_PathPlan::getRouteArr(vector<int> &vec, int x)
 	vec.clear();
 	Ant *antp;
 	antp = (x == -1) ? &gbest : &ants[x];
-	antp->in_use = true;
+	WaitForSingleObject(antp->mutex, INFINITE);
 	for (int i = 0; i < antp->tabu.size(); ++i)
 	{
 		vec.push_back(xC(antp->tabu[i]));
 		vec.push_back(yC(antp->tabu[i]));
 	}
-	antp->in_use = false;
+	ReleaseMutex(antp->mutex);
 }

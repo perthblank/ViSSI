@@ -66,6 +66,8 @@ public:
 
 	void drawLines(vector<int>&);
 
+	void toggleShowGbestOnly();
+
 
 private:
 
@@ -136,6 +138,8 @@ private:
 	bool alive;
 
 	SIMethod *sip;
+
+	bool draw_gbest_only = false;
 
 };
 

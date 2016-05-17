@@ -26,7 +26,7 @@ ACOMethod::~ACOMethod()
 
 	for (int i = 0; i < a_num; ++i)
 	{
-		cout << sizeof(*routes[i]) << endl;
+		//cout << sizeof(*routes[i]) << endl;
 		delete routes[i];
 	}
 

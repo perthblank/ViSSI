@@ -14,7 +14,7 @@ public:
 		is_running(false), 
 		alive(true){}
 
-	virtual bool iterate(bool force, int t)
+	bool iterate(bool force, int t)
 	{
 
 		if (!alive)
@@ -97,7 +97,7 @@ protected:
 
 	float * position_a, * pcval_a, * gb_pos;
 
-	float gb_val;
+	float gb_val = 0;;
 
 	bool is_ok;
 

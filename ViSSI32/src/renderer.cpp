@@ -167,12 +167,12 @@ int Renderer::doRender()
 	do {
 
 		double currentTime = glfwGetTime();
-		nbFrames++;
-		if (currentTime - lastTime >= 1.0) { 
-			printf(" ms/frame, frames:%d\n",  nbFrames);
-			nbFrames = 0;
-			lastTime += 1.0;
-		}
+		//nbFrames++;
+		//if (currentTime - lastTime >= 1.0) { 
+		//	printf("FPS (frames/s): %d\n",  nbFrames);
+		//	nbFrames = 0;
+		//	lastTime += 1.0;
+		//}
 
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -227,7 +227,7 @@ int Renderer::doRender()
 	glDeleteBuffers(1, &gridbuffer);
 	glDeleteBuffers(1, &squrebuffer);
 	glDeleteVertexArrays(1, &VertexArrayID);
-	glDeleteProgram(program_ID);
+	glDeleteProgram(program_ID);	
 
 	glfwTerminate();
 
@@ -374,20 +374,24 @@ void Renderer::drawTSP()
 	glLineWidth(2.5);
 	drawLines(gb_route_arr);
 
-	glUniform1i(color_flag_ID, BLUE);
-	glLineWidth(1.0);
-	for (int x = 0; x < ((ACOMethod*)sip)->a_num; ++x)
+	if (!draw_gbest_only)
 	{
-		vector<int> route_arr;
-		int * route = ((ACOMethod*)sip)->routes[x]->route;
-		for (int i = 0; i < city_num; ++i)
+		glUniform1i(color_flag_ID, BLUE);
+		glLineWidth(1.0);
+		for (int x = 0; x < ((ACOMethod*)sip)->a_num; ++x)
 		{
-			int ci = route[i];
-			route_arr.push_back(city_pos[2 * ci]);
-			route_arr.push_back(city_pos[2 * ci + 1]);
+			vector<int> route_arr;
+			int * route = ((ACOMethod*)sip)->routes[x]->route;
+			for (int i = 0; i < city_num; ++i)
+			{
+				int ci = route[i];
+				route_arr.push_back(city_pos[2 * ci]);
+				route_arr.push_back(city_pos[2 * ci + 1]);
+			}
+			drawLines(route_arr);
 		}
-		drawLines(route_arr);
 	}
+
 }
 
 void Renderer::drawAxis()
@@ -521,15 +525,30 @@ void Renderer::drawCovery()
 	glDrawArrays(GL_LINES, 0, scale * 4 + 4);
 
 	glDisableVertexAttribArray(vPos);
-	glUniform1i(color_flag_ID, RED);
+	
 	float * pos =
-		//sip->getGBPosArr();
-		p_vertex;
+		sip->getGBPosArr();
+		//p_vertex;
 	glLineWidth(3.0f);
+	glUniform1i(color_flag_ID, RED);
 	for (int i = 0; i < ((Coverage_function *)sip->getFitnessFunction())->p_num * 2; i += 2)
 	{
 		drawCircle_XZ(pos[i], pos[i + 1], ((Coverage_function *)sip->getFitnessFunction())->radius);
 	}
+
+	if (!draw_gbest_only)
+	{
+		pos =
+			//sip->getGBPosArr();
+			p_vertex;
+		glLineWidth(2.0f);
+		glUniform1i(color_flag_ID, BLUE);
+		for (int i = 0; i < ((Coverage_function *)sip->getFitnessFunction())->p_num * 2; i += 2)
+		{
+			drawCircle_XZ(pos[i], pos[i + 1], ((Coverage_function *)sip->getFitnessFunction())->radius);
+		}
+	}
+
 }
 
 void Renderer::drawPathPlanning()
@@ -594,14 +613,19 @@ void Renderer::drawPathPlanning()
 	aco_path->getRouteArr(gb, -1);
 	drawLines(gb);
 
-	glUniform1i(color_flag_ID, BLUE);
-	glLineWidth(1.0);
-	for (int x = 0; x < aco_path->a_num; ++x)
+
+	if (!draw_gbest_only)
 	{
-		vector<int> route_arr;
-		aco_path->getRouteArr(route_arr, x);
-		drawLines(route_arr);
+		glUniform1i(color_flag_ID, BLUE);
+		glLineWidth(1.0);
+		for (int x = 0; x < aco_path->a_num; ++x)
+		{
+			vector<int> route_arr;
+			aco_path->getRouteArr(route_arr, x);
+			drawLines(route_arr);
+		}
 	}
+
 
 }
 
@@ -735,4 +759,10 @@ void Renderer::drawArray(
 
 	glDisableVertexAttribArray(vPos);
 	glDisableVertexAttribArray(vColor);
+}
+
+
+void Renderer::toggleShowGbestOnly()
+{
+	draw_gbest_only = !draw_gbest_only;
 }

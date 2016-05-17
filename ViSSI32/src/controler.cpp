@@ -134,10 +134,12 @@ void Controler::setMethod(
 	if (sip != NULL)
 	{
 		delete sip;
+		sip = NULL;
 	}
 	if (fitness_f != NULL)
 	{
 		delete fitness_f;
+		fitness_f = NULL;
 	}
 
 	if (!strcmp(method, METHOD_LABELS.PSO))
@@ -268,4 +270,9 @@ void Controler::moveView(int op, float diff)
 void Controler::save_gbest(const char * name)
 {
 	sip->save_gbest(name);
+}
+
+void Controler::toggleShowGbestOnly()
+{
+	rderp->toggleShowGbestOnly();
 }

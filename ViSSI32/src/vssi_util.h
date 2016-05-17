@@ -6,6 +6,7 @@
 #include <string>
 #include <sstream>
 #include <vector>
+#include <iostream>
 
 using namespace std;
 
@@ -91,6 +92,19 @@ public:
 		return (a - b < 0.000001);
 	}
 
+	static void print(float* arr, int n)
+	{
+		for (int i = 0; i < n; ++i)
+			cout << arr[i] << " ";
+		cout << endl;
+	}
+
+	static void print(vector<float> vec)
+	{
+		for (int i = 0; i < vec.size(); ++i)
+			cout << vec[i] << " ";
+		cout << endl;
+	}
 
 };
 

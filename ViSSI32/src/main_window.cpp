@@ -337,15 +337,15 @@ void loadConfigFile()
 
 void initConfig()
 {
-	inp_pso_popSize->value("1000");
+	inp_pso_popSize->value("10");
 	inp_pso_spcScale->value("512");
 	inp_pso_c1->value("0.2");
 	inp_pso_c2->value("0.2");
 	inp_pso_wValue->value("0.8");
 	inp_pso_maxT->value("300");
 
-	inp_coverage_numOfNode->value("10");
-	inp_coverage_radius->value("3.5");
+	inp_coverage_numOfNode->value("30");
+	inp_coverage_radius->value("1.5");
 	inp_coverage_Scale->value("20");
 
 	inp_aco_popSize->value("5");
@@ -823,17 +823,17 @@ int setWindow(int argc, char **argv) {
 		} // Fl_Button* btn_start
 
 		{
-			btn_save = new Fl_Button(120, 560, 80, 30, "Save");
-			btn_save->callback((Fl_Callback*)callback);
+			//btn_save = new Fl_Button(120, 560, 80, 30, "Save");
+			//btn_save->callback((Fl_Callback*)callback);
 		} // Fl_Button* btn_save
 
 		{
-			btn_exit = new Fl_Button(510, 560, 80, 30, "Exit");
-			btn_exit->callback((Fl_Callback*)callback);
+			//btn_exit = new Fl_Button(510, 560, 80, 30, "Exit");
+			//btn_exit->callback((Fl_Callback*)callback);
 		} // Fl_Button* btn_exit
 
 		{
-			btn_about = new Fl_Button(505, 10, 85, 30, "About");
+			//btn_about = new Fl_Button(505, 10, 85, 30, "About");
 		} // Fl_Button* btn_about
 		main_window->end();
 

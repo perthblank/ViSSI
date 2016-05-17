@@ -13,6 +13,8 @@ void cb_gotT(Fl_Widget *o, void *);
 
 void cb_save_gbest(Fl_Widget *o, void *);
 
+void cb_toggle_gbest(Fl_Widget* o, void*);
+
 void cb_speed_slider(Fl_Widget *o, void *);
 
 void update_process(void *);

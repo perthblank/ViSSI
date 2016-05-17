@@ -68,9 +68,9 @@ private:
 
 	float vel_scale;
 
-	unsigned population;
+	int population;
 
-	unsigned dim;
+	int dim;
 
 	float c1, c2, omega;
 
