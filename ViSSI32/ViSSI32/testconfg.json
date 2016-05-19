@@ -3,7 +3,7 @@
 "method":1,
 "method_config":
 	{
-		"population": 50,
+		"population": 1234,
 		"scale":400,
 		"max_t":300,
 		"wof":1,
@@ -15,7 +15,8 @@
 "model":"Continuous_Benchmark",
 "model_config":
 	{
-		"function":"Sphere_function",
+		//"function":"Sphere_function",
+		"function":"HolderTable_function",
 		"dim":3
 	}
 }

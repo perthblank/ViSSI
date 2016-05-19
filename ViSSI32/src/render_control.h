@@ -23,7 +23,9 @@ struct InputFactorClass
 
 	double radius = 1.0;
 
-	void refreshView()
+	double incr = 1;
+
+	void refreshView(float r)
 	{
 		oldmx = 0;
 		oldmy = 0;
@@ -32,7 +34,8 @@ struct InputFactorClass
 		degy = 0;
 		h = 1.0;
 		f_a2r = 0.0174;
-		radius = 1.0;
+		radius = r;
+		incr = sqrt(r);
 	}
 
 };

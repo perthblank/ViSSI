@@ -865,6 +865,6 @@ void cb_close_main_window(Fl_Widget *, void *)
 
 void callback(Fl_Widget* o, void*)
 {
-	printf("Default callback\n");
+	//printf("Default callback\n");
 }
 

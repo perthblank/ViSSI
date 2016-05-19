@@ -7,14 +7,14 @@ Renderer::Renderer(
 	int draw_type) :
 	p_num(population), draw_type(draw_type), sip(sip), pos_scale(pos_scale)
 {
-	InputFactor.refreshView();
+	InputFactor.refreshView(pos_scale * 2);
 
 	is_ok = false;
-	InputFactor.radius = pos_scale * 2;
+
 	v_size = p_num * 3;
 	p_vertex = sip->getPosArr();
 
-	Projection = glm::perspective(70.0f, 4.0f / 3.0f, 0.1f, pos_scale * 10);
+	Projection = glm::perspective(70.0f, 4.0f / 3.0f, 0.001f, 10000.0f);
 	Model = glm::translate(Model, glm::vec3(-pos_scale / 2, -pos_scale / 2, -pos_scale / 2));
 
 	if (!gl_config()) return;
@@ -131,6 +131,8 @@ Renderer::Renderer(
 
 	is_ok = true;
 	alive = true;
+
+	//cout << "pso_scale: " << pos_scale << endl;
 }
 
 Renderer::~Renderer()
@@ -149,7 +151,7 @@ void Renderer::normal3DView()
 	View = glm::lookAt(
 		glm::vec3(
 			InputFactor.radius*cos(InputFactor.f_a2r*InputFactor.degx),
-			InputFactor.h*pos_scale,
+			InputFactor.h*sqrt(pos_scale),
 			InputFactor.radius*sin(InputFactor.f_a2r*InputFactor.degx)
 			),
 		glm::vec3(0, 0, 0),
@@ -428,25 +430,28 @@ void Renderer::draw2Dspace()
 	glPointSize(1.5);
 	glDrawArrays(GL_POINTS, 0, p_num);
 
+	if (!draw_gbest_only)
+	{
 
-	GLuint valuePos = glGetAttribLocation(program_ID, "vertexValue");
-	glEnableVertexAttribArray(valuePos);
-	glBindBuffer(GL_ARRAY_BUFFER, valuebuffer);
-	glVertexAttribPointer(
-		valuePos,
-		1,
-		GL_FLOAT,
-		GL_FALSE,
-		0,
-		(void*)0
-		);
+		GLuint valuePos = glGetAttribLocation(program_ID, "vertexValue");
+		glEnableVertexAttribArray(valuePos);
+		glBindBuffer(GL_ARRAY_BUFFER, valuebuffer);
+		glVertexAttribPointer(
+			valuePos,
+			1,
+			GL_FLOAT,
+			GL_FALSE,
+			0,
+			(void*)0
+			);
 
-	glUniform1i(draw_flag_ID, 20);
-	glUniform1i(color_flag_ID, DIFF_BASED);
-	glPointSize(4.5);
-	glDrawArrays(GL_POINTS, 0, p_num);
+		glUniform1i(draw_flag_ID, 20);
+		glUniform1i(color_flag_ID, DIFF_BASED);
+		glPointSize(4.5);
+		glDrawArrays(GL_POINTS, 0, p_num);
 
 	glDisableVertexAttribArray(valuePos);
+	}
 
 }
 

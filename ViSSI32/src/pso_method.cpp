@@ -190,6 +190,7 @@ void PSOMethod::printgb()
 	cout << endl;
 }
 
+
 float Coverage_function::operator() (float* pos)
 {
 	resetCP();
@@ -235,14 +236,17 @@ float Coverage_function::operator() (float* pos)
 		//}
 
 		//else 
-			if (count <= 5)
+		if (count <= 5)
 		{
 			int factor =
-				//ceil(radius);
+				//ceil(radius);	
 				2;
 
-			x += rand() % (int)(2 * factor + 1) - 1 * factor;
-			y += rand() % (int)(2 * factor + 1) - 1 * factor;
+				x += rand() % (int)(2 * factor + 1) - 1 * factor ;
+				y += rand() % (int)(2 * factor + 1) - 1 * factor;
+			
+				valify(x);
+				valify(y);
 
 		}
 		sum += count;

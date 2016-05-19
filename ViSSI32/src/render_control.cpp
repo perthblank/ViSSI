@@ -32,8 +32,10 @@ void adjustView(double x, double y)
 	InputFactor.degx += x;
 	InputFactor.degy += y;
 	InputFactor.h += 0.1f*(y);
-	if (InputFactor.h>1.5) InputFactor.h = 1.5;
-	else if (InputFactor.h<-1.5) InputFactor.h = -1.5;
+	
+	//if (InputFactor.h>1.5) InputFactor.h = 1.5;
+	//else if (InputFactor.h<-1.5) InputFactor.h = -1.5;
+
 	InputFactor.oldmx += x;
 	InputFactor.oldmy += y;
 }
@@ -45,6 +47,7 @@ void adjustView(double, double, double r)
 
 void mouseScroll(GLFWwindow* window, double xoffset, double yoffset)
 {
-	InputFactor.radius += yoffset * 3;
+	InputFactor.radius += yoffset * InputFactor.incr;
+	//cout << InputFactor.radius << endl;
 }
 

@@ -183,7 +183,7 @@ int setCp3d() {
 			cp3d_group_info = new Fl_Group(410, 220, 135, 135, "---");
 			//cp3d_group_info->box(FL_PLASTIC_THIN_DOWN_BOX);
 			{
-				Fl_Light_Button *btn_toggle_gbest = new Fl_Light_Button(420, 235, 130, 27, "gbest Only");
+				Fl_Light_Button *btn_toggle_gbest = new Fl_Light_Button(420, 235, 130, 27, "Mode");
 				btn_toggle_gbest->selection_color(FL_RED);
 				btn_toggle_gbest->callback((Fl_Callback*)cb_toggle_gbest);
 

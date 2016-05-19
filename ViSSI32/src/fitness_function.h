@@ -137,6 +137,15 @@ public:
 		return cp_map;
 	}
 
+	void valify(float &x)
+	{
+		if (x < 0)
+			x = 0;
+		else if (x>scale)
+			x = scale;
+	}
+
+
 	int p_num;
 
 	float radius;
